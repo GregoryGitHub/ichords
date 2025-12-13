@@ -19,24 +19,29 @@ interface ChordShape {
   baseString: 6 | 5 | 4; // Corda da tônica (6 = Mizona, 5 = Lá, 4 = Ré)
   frets: number[]; // Deslocamento relativo à tônica [E, A, D, G, B, e]
   fingers?: number[]; // Dedos sugeridos [E, A, D, G, B, e]
+  rootFretOffset?: number; // Quantas casas a tônica está deslocada da corda solta no shape original (ex: C shape = 3)
 }
 
 const SHAPES: Record<string, ChordShape[]> = {
   'major': [
-    { name: "Formato de E (6ª Corda)", baseString: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] }, 
-    { name: "Formato de A (5ª Corda)", baseString: 5, frets: [-1, 0, 2, 2, 2, 0], fingers: [0, 1, 2, 3, 4, 1] },
-    { name: "Formato de D (4ª Corda)", baseString: 4, frets: [-1, -1, 0, 2, 3, 2], fingers: [0, 0, 0, 1, 3, 2] }
+    { name: "Formato de C (CAGED)", baseString: 5, frets: [-1, 3, 2, 0, 1, 0], fingers: [0, 3, 2, 0, 1, 0], rootFretOffset: 3 },
+    { name: "Formato de A (CAGED)", baseString: 5, frets: [-1, 0, 2, 2, 2, 0], fingers: [0, 1, 2, 3, 4, 1] },
+    { name: "Formato de G (CAGED)", baseString: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 0, 0, 0, 4], rootFretOffset: 3 },
+    { name: "Formato de E (CAGED)", baseString: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] }, 
+    { name: "Formato de D (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 3, 2], fingers: [0, 0, 0, 1, 3, 2] }
   ],
   'minor': [
-    { name: "Formato de Em (6ª Corda)", baseString: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] }, 
-    { name: "Formato de Am (5ª Corda)", baseString: 5, frets: [-1, 0, 2, 2, 1, 0], fingers: [0, 1, 3, 4, 2, 1] },
-    { name: "Formato de Dm (4ª Corda)", baseString: 4, frets: [-1, -1, 0, 2, 3, 1], fingers: [0, 0, 0, 2, 4, 1] }
+    { name: "Formato de Em", baseString: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] }, 
+    { name: "Formato de Am", baseString: 5, frets: [-1, 0, 2, 2, 1, 0], fingers: [0, 1, 3, 4, 2, 1] },
+    { name: "Formato de Dm", baseString: 4, frets: [-1, -1, 0, 2, 3, 1], fingers: [0, 0, 0, 2, 4, 1] }
   ],
   'dom7': [ // 7
+    { name: "Formato de C7", baseString: 5, frets: [-1, 3, 2, 3, 1, 0], fingers: [0, 3, 2, 4, 1, 0], rootFretOffset: 3 },
     { name: "Formato de E7", baseString: 6, frets: [0, 2, 0, 1, 0, 0], fingers: [1, 3, 1, 2, 1, 1] }, 
     { name: "Formato de A7", baseString: 5, frets: [-1, 0, 2, 0, 2, 0], fingers: [0, 1, 3, 1, 4, 1] } 
   ],
   'maj7': [
+    { name: "Formato de Cmaj7", baseString: 5, frets: [-1, 3, 2, 0, 0, 0], fingers: [0, 3, 2, 0, 0, 0], rootFretOffset: 3 },
     { name: "Formato de Emaj7", baseString: 6, frets: [0, -1, 1, 1, 0, -1], fingers: [1, 0, 3, 4, 2, 0] }, 
     { name: "Formato de Amaj7", baseString: 5, frets: [-1, 0, 2, 1, 2, 0], fingers: [0, 1, 3, 2, 4, 1] } 
   ],
@@ -74,7 +79,7 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
     const rootIndex = CHROMATIC_SCALE.indexOf(root);
     
     // Tenta encontrar shapes disponíveis para o tipo
-    let shapes = SHAPES[chordType] || SHAPES['major']; // Fallback para maior
+    let shapes = SHAPES[chordType] || SHAPES['major']; 
     
     // Garante que o index é válido (loop circular)
     const validIndex = Math.abs(variationIndex) % shapes.length;
@@ -86,12 +91,16 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
     if (selectedShape.baseString === 5) openStringIndex = 9;
     if (selectedShape.baseString === 4) openStringIndex = 2;
 
-    let fretOffset = (rootIndex - openStringIndex + 12) % 12;
+    const rootOffset = selectedShape.rootFretOffset || 0;
+    const shapeRootIndex = (openStringIndex + rootOffset) % 12;
+
+    // Shift necessario para transformar a tônica do shape original na tônica desejada
+    let shift = (rootIndex - shapeRootIndex + 12) % 12;
 
     // Calcula as casas reais
     const absoluteFrets = selectedShape.frets.map(f => {
       if (f === -1) return -1; // Mute
-      return f + fretOffset;
+      return f + shift;
     });
 
     // Determina a casa inicial do desenho (minFret) para desenhar o diagrama
@@ -99,15 +108,25 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
     const minPlayed = playedFrets.length > 0 ? Math.min(...playedFrets) : 0;
     
     // Se o acorde for muito longe, o diagrama começa lá
+    // Se o acorde tiver cordas soltas (0), startFret tem que ser 1 para aparecer o Nut
+    const hasOpenStrings = absoluteFrets.some(f => f === 0);
     let startFret = minPlayed > 0 ? minPlayed : 1;
     
-    // Ajuste para caber o desenho em 5 casas
-    if (Math.max(...absoluteFrets) <= 5) startFret = 1;
+    if (hasOpenStrings) {
+        startFret = 1;
+    } else {
+        // Se todas as notas forem em casas altas, move o diagrama
+        // Mas se o acorde couber nas primeiras 5 casas, mantem startFret 1
+        if (Math.max(...absoluteFrets) <= 5) startFret = 1;
+    }
 
     // Normaliza para o desenho (0 = solta, 1..5 = casas relativas ao startFret)
     const displayFrets = absoluteFrets.map(f => {
       if (f === -1) return -1;
-      if (f === 0) return 0; // Corda solta sempre aparece acima do nut
+      if (f === 0) return 0; 
+      
+      // Se startFret for 1, as casas são literais (ex: casa 3 = desenha na 3)
+      // Se startFret for 5, casa 5 = desenha na 1 (top slot)
       return f - startFret + 1;
     });
 
@@ -127,49 +146,53 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
   // Constantes de desenho
   const NUM_STRINGS = 6;
   const NUM_FRETS = 5;
-  const STRING_SPACING = 30;
-  const FRET_SPACING = 40;
-  const MARGIN_X = 40;
-  const MARGIN_Y = 40;
+  const STRING_SPACING = 28; // Reduzido levemente
+  const FRET_SPACING = 36;   // Reduzido levemente
+  const MARGIN_X = 35;
+  const MARGIN_Y = 35;
+  const SVG_WIDTH = 210;
+  const SVG_HEIGHT = 240;
 
   const nextVariation = () => setVariationIndex(prev => prev + 1);
   const prevVariation = () => setVariationIndex(prev => prev - 1);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl max-w-sm w-full relative overflow-hidden flex flex-col items-center p-6">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-[340px] relative flex flex-col items-center p-5 max-h-[85vh] overflow-y-auto no-scrollbar">
         
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
+          className="absolute top-2 right-2 text-slate-500 hover:text-white transition-colors p-2"
         >
           <X size={24} />
         </button>
 
-        <h2 className="text-4xl font-bold text-brand-400 mb-1">{chordSymbol}</h2>
-        
+        <div className="text-center mt-2 mb-4 w-full">
+           <h2 className="text-3xl font-bold text-brand-400">{chordSymbol}</h2>
+        </div>
+
         {/* Navigation Controls */}
-        <div className="flex items-center gap-4 mb-4 mt-2">
+        <div className="flex items-center justify-between w-full px-2 mb-2 bg-slate-800/50 p-2 rounded-lg">
           <button 
             onClick={prevVariation}
-            className="p-1 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
+            className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
             disabled={chordConfig.totalVariations <= 1}
           >
             <ChevronLeft size={20} />
           </button>
           
           <div className="flex flex-col items-center">
-             <span className="text-slate-300 text-xs font-semibold">
+             <span className="text-slate-200 text-xs font-semibold text-center">
                {chordConfig.shapeName}
              </span>
-             <span className="text-slate-600 text-[10px] uppercase">
-               Opção {chordConfig.currentIndex + 1} de {chordConfig.totalVariations}
+             <span className="text-slate-500 text-[10px] uppercase mt-0.5">
+               {chordConfig.currentIndex + 1} / {chordConfig.totalVariations}
              </span>
           </div>
 
           <button 
             onClick={nextVariation}
-            className="p-1 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
+            className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
             disabled={chordConfig.totalVariations <= 1}
           >
             <ChevronRight size={20} />
@@ -177,8 +200,8 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
         </div>
 
         {/* Diagrama SVG */}
-        <div className="relative bg-white rounded-lg p-2 shadow-lg transition-all duration-300">
-           <svg width={230} height={260} viewBox="0 0 230 260">
+        <div className="relative bg-white rounded-lg p-2 shadow-lg mb-2">
+           <svg width={SVG_WIDTH} height={SVG_HEIGHT} viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}>
               {/* Defs para sombras */}
               <defs>
                 <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
@@ -188,14 +211,14 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
 
               {/* Casa Inicial Indicador (ex: 5ª casa) */}
               {chordConfig.startFret > 1 && (
-                <text x={MARGIN_X - 15} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-500 text-sm font-bold font-sans">
+                <text x={MARGIN_X - 12} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-500 text-sm font-bold font-sans">
                   {chordConfig.startFret}ª
                 </text>
               )}
 
               {/* NUT (Pestana superior) */}
               {chordConfig.startFret === 1 && (
-                <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={6} fill="#334155" />
+                <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={5} fill="#334155" />
               )}
 
               {/* Frets (Linhas Horizontais) */}
@@ -203,9 +226,9 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
                 <line
                   key={`fret-${i}`}
                   x1={MARGIN_X}
-                  y1={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 6 : 0)}
+                  y1={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
                   x2={MARGIN_X + STRING_SPACING * 5}
-                  y2={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 6 : 0)}
+                  y2={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
                   stroke="#94a3b8"
                   strokeWidth={i === 0 && chordConfig.startFret > 1 ? 2 : 1} // Top line slightly thicker if not nut
                 />
@@ -238,19 +261,19 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
                 if (fret === 0) {
                   // Corda solta mas tocada
                   return (
-                    <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 14} r={5} fill="none" stroke="#64748b" strokeWidth={2} />
+                    <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 14} r={4} fill="none" stroke="#64748b" strokeWidth={2} />
                   );
                 }
 
                 // Bolinha no braço
-                const y = MARGIN_Y + (fret - 0.5) * FRET_SPACING + (chordConfig.startFret === 1 ? 6 : 0);
+                const y = MARGIN_Y + (fret - 0.5) * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0);
                 
                 return (
                   <g key={`dot-${stringIndex}`}>
                     <circle 
                       cx={x} 
                       cy={y} 
-                      r={11} 
+                      r={10} 
                       className="fill-brand-600"
                       filter="url(#shadow)"
                     />
@@ -267,8 +290,8 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
            </svg>
         </div>
 
-        <p className="mt-4 text-xs text-slate-500 text-center max-w-[200px]">
-          * Pressione as setas para ver outras variações de digitação.
+        <p className="text-[10px] text-slate-500 text-center leading-tight px-4">
+          O diagrama mostra onde posicionar os dedos no braço do instrumento.
         </p>
 
       </div>
