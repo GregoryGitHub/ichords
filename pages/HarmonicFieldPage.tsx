@@ -1,13 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { NoteSelector } from '../components/NoteSelector';
 import { generateHarmonicField } from '../core/musicTheory';
-import { NoteName } from '../types';
+import { HarmonicFieldChordModal } from '../components/HarmonicFieldChordModal';
+import { NoteName, Chord } from '../types';
 import { ChevronRight } from 'lucide-react';
 import { INTERVALS_MAP } from '../constants';
 
 export const HarmonicFieldPage: React.FC = () => {
   const [root, setRoot] = useState<NoteName>('C');
   const [mode, setMode] = useState<'major' | 'minor'>('major');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedChord, setSelectedChord] = useState<{ chord: Chord; degree: string } | null>(null);
 
   const harmonicField = useMemo(() => generateHarmonicField(root, mode), [root, mode]);
 
@@ -50,7 +53,14 @@ export const HarmonicFieldPage: React.FC = () => {
 
       <div className="space-y-3">
         {harmonicField.map((slot, idx) => (
-          <div key={idx} className="bg-slate-800 rounded-lg p-4 border border-slate-700 flex items-center justify-between hover:bg-slate-750 transition-colors cursor-pointer group">
+          <div 
+            key={idx} 
+            onClick={() => {
+              setSelectedChord({ chord: slot.chord, degree: slot.degree });
+              setIsModalOpen(true);
+            }}
+            className="bg-slate-800 rounded-lg p-4 border border-slate-700 flex items-center justify-between hover:bg-slate-750 transition-colors cursor-pointer group"
+          >
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center font-serif italic text-slate-500 border border-slate-700">
                 {slot.degree}
@@ -81,6 +91,18 @@ export const HarmonicFieldPage: React.FC = () => {
           Por exemplo, no tom de Dó Maior, o acorde de Ré é menor (Dm) porque a terça maior de Ré (F#) não existe na escala de Dó. Temos que usar o Fá natural, resultando numa terça menor.
         </p>
       </div>
+
+      {selectedChord && (
+        <HarmonicFieldChordModal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedChord(null);
+          }}
+          chord={selectedChord.chord}
+          degree={selectedChord.degree}
+        />
+      )}
     </div>
   );
 };

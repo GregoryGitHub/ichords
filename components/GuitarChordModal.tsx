@@ -36,22 +36,32 @@ const SHAPES: Record<string, ChordShape[]> = {
     { name: "Formato de Dm", baseString: 4, frets: [-1, -1, 0, 2, 3, 1], fingers: [0, 0, 0, 2, 4, 1] }
   ],
   'dom7': [ // 7
-    { name: "Formato de C7", baseString: 5, frets: [-1, 3, 2, 3, 1, 0], fingers: [0, 3, 2, 4, 1, 0], rootFretOffset: 3 },
-    { name: "Formato de E7", baseString: 6, frets: [0, 2, 0, 1, 0, 0], fingers: [1, 3, 1, 2, 1, 1] }, 
-    { name: "Formato de A7", baseString: 5, frets: [-1, 0, 2, 0, 2, 0], fingers: [0, 1, 3, 1, 4, 1] } 
+    { name: "Formato de C7 (CAGED)", baseString: 5, frets: [-1, 3, 2, 3, 1, 0], fingers: [0, 3, 2, 4, 1, 0], rootFretOffset: 3 },
+    { name: "Formato de A7 (CAGED)", baseString: 5, frets: [-1, 0, 2, 0, 2, 0], fingers: [0, 1, 3, 1, 4, 1] },
+    { name: "Formato de G7 (CAGED)", baseString: 6, frets: [3, 2, 0, 0, 0, 1], fingers: [3, 2, 0, 0, 0, 1], rootFretOffset: 3 },
+    { name: "Formato de E7 (CAGED)", baseString: 6, frets: [0, 2, 0, 1, 0, 0], fingers: [1, 3, 1, 2, 1, 1] },
+    { name: "Formato de D7 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 1, 2], fingers: [0, 0, 0, 2, 1, 3] }
   ],
   'maj7': [
-    { name: "Formato de Cmaj7", baseString: 5, frets: [-1, 3, 2, 0, 0, 0], fingers: [0, 3, 2, 0, 0, 0], rootFretOffset: 3 },
-    { name: "Formato de Emaj7", baseString: 6, frets: [0, -1, 1, 1, 0, -1], fingers: [1, 0, 3, 4, 2, 0] }, 
-    { name: "Formato de Amaj7", baseString: 5, frets: [-1, 0, 2, 1, 2, 0], fingers: [0, 1, 3, 2, 4, 1] } 
+    { name: "Formato de Cmaj7 (CAGED)", baseString: 5, frets: [-1, 3, 2, 0, 0, 0], fingers: [0, 3, 2, 0, 0, 0], rootFretOffset: 3 },
+    { name: "Formato de Amaj7 (CAGED)", baseString: 5, frets: [-1, 0, 2, 1, 2, 0], fingers: [0, 1, 3, 2, 4, 1] },
+    { name: "Formato de Gmaj7 (CAGED)", baseString: 6, frets: [3, 2, 0, 0, 0, 2], fingers: [3, 2, 0, 0, 0, 4], rootFretOffset: 3 },
+    { name: "Formato de Emaj7 (CAGED)", baseString: 6, frets: [0, -1, 1, 1, 0, -1], fingers: [1, 0, 3, 4, 2, 0] },
+    { name: "Formato de Dmaj7 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 2, 2], fingers: [0, 0, 0, 1, 2, 3] }
   ],
   'm7': [
-    { name: "Formato de Em7", baseString: 6, frets: [0, 2, 0, 0, 0, 0], fingers: [1, 3, 1, 1, 1, 1] }, 
-    { name: "Formato de Am7", baseString: 5, frets: [-1, 0, 2, 0, 1, 0], fingers: [0, 1, 3, 1, 2, 1] } 
+    { name: "Formato de Cm7 (CAGED)", baseString: 5, frets: [-1, 3, 1, 0, 1, 0], fingers: [0, 3, 1, 0, 2, 0], rootFretOffset: 3 },
+    { name: "Formato de Am7 (CAGED)", baseString: 5, frets: [-1, 0, 2, 0, 1, 0], fingers: [0, 1, 3, 1, 2, 1] },
+    { name: "Formato de Gm7 (CAGED)", baseString: 6, frets: [3, 1, 0, 0, 0, 1], fingers: [3, 1, 0, 0, 0, 2], rootFretOffset: 3 },
+    { name: "Formato de Em7 (CAGED)", baseString: 6, frets: [0, 2, 0, 0, 0, 0], fingers: [1, 3, 1, 1, 1, 1] },
+    { name: "Formato de Dm7 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 1, 1], fingers: [0, 0, 0, 2, 1, 1] }
   ],
   'm7b5': [ // Meio diminuto
-    { name: "Formato 6ª Corda", baseString: 6, frets: [0, -1, 0, 0, -1, -1], fingers: [1, 0, 2, 3, 0, 0] }, 
-    { name: "Formato 5ª Corda", baseString: 5, frets: [-1, 0, 1, 0, 1, -1], fingers: [0, 1, 2, 1, 3, 0] } 
+    { name: "Formato de Cm7b5 (CAGED)", baseString: 5, frets: [-1, 3, 1, 0, 1, -1], fingers: [0, 3, 1, 0, 2, 0], rootFretOffset: 3 },
+    { name: "Formato de Am7b5 (CAGED)", baseString: 5, frets: [-1, 0, 1, 0, 1, -1], fingers: [0, 1, 2, 1, 3, 0] },
+    { name: "Formato de Gm7b5 (CAGED)", baseString: 6, frets: [3, 1, 0, 0, -1, 1], fingers: [3, 1, 0, 0, 0, 2], rootFretOffset: 3 },
+    { name: "Formato de Em7b5 (CAGED)", baseString: 6, frets: [0, -1, 0, 0, -1, -1], fingers: [1, 0, 2, 3, 0, 0] },
+    { name: "Formato de Dm7b5 (CAGED)", baseString: 4, frets: [-1, -1, 0, 1, 1, 1], fingers: [0, 0, 0, 1, 2, 3] }
   ],
   'dim7': [ // Diminuto completo
     { name: "Formato Diminuto", baseString: 5, frets: [-1, 0, 1, -1, 1, -1], fingers: [0, 1, 2, 0, 3, 0] } 
