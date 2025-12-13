@@ -43,29 +43,92 @@ export const generateChord = (
 
   const notes = allSemitones.map(semitone => getNoteAtOffset(root, semitone));
 
-  // Build Symbol
-  let symbol = root + formula.symbol;
-  
-  // Naive extension naming logic for MVP
-  // If base is C7 and we add 9 (14 semitones), it becomes C9 usually
+  // Build Symbol with proper jazz nomenclature
   const has7 = formula.intervals.includes(10) || formula.intervals.includes(11);
   const has9 = extensions.includes(14);
   const has11 = extensions.includes(17);
   const has13 = extensions.includes(21);
 
-  let extString = "";
-  if (has9) extString = "9";
-  if (has11) extString = extString ? `${extString},11` : "11";
-  if (has13) extString = extString ? `${extString},13` : "13";
+  let symbol = root;
+  let detailedExtensions = "";
 
-  // Specialized naming replacement (Basic implementation)
-  if (baseType === 'dom7' && has9 && !has11 && !has13) symbol = root + "9";
-  else if (extString) symbol += `(${extString})`;
+  // Nomenclatura específica por tipo de acorde (forma explícita)
+  if (baseType === 'dom7') {
+    // Dominantes: C7(9), C7(13), C7(11), etc.
+    symbol += "7";
+    if (has9 || has11 || has13) {
+      let extParts = [];
+      if (has9) extParts.push("9");
+      if (has11) extParts.push("11");
+      if (has13) extParts.push("13");
+      symbol += `(${extParts.join(",")})`;
+      detailedExtensions = extParts.join(", ");
+    }
+  } else if (baseType === 'maj7') {
+    // Maior com sétima maior: Cmaj7(9)
+    symbol += "maj7";
+    if (has9 || has11 || has13) {
+      let extParts = [];
+      if (has9) extParts.push("9");
+      if (has11) extParts.push("11");
+      if (has13) extParts.push("13");
+      symbol += `(${extParts.join(",")})`;
+      detailedExtensions = extParts.join(", ");
+    }
+  } else if (baseType === 'm7') {
+    // Menor com sétima: Cm7(9)
+    symbol += "m7";
+    if (has9 || has11 || has13) {
+      let extParts = [];
+      if (has9) extParts.push("9");
+      if (has11) extParts.push("11");
+      if (has13) extParts.push("13");
+      symbol += `(${extParts.join(",")})`;
+      detailedExtensions = extParts.join(", ");
+    }
+  } else if (baseType === 'major') {
+    // Tríade maior: C(add9)
+    symbol += formula.symbol; // C
+    if (has9 || has11 || has13) {
+      let extParts = [];
+      if (has9) extParts.push("add9");
+      if (has11) extParts.push("add11");
+      if (has13) extParts.push("add13");
+      symbol += extParts.length > 1 ? `(${extParts.join(",")})` : extParts[0];
+      detailedExtensions = has9 ? "9" : (has11 ? "11" : "13");
+    }
+  } else if (baseType === 'minor') {
+    // Tríade menor: Cm(add9)
+    symbol += formula.symbol; // Cm
+    if (has9 || has11 || has13) {
+      let extParts = [];
+      if (has9) extParts.push("add9");
+      if (has11) extParts.push("add11");
+      if (has13) extParts.push("add13");
+      symbol += extParts.length > 1 ? `(${extParts.join(",")})` : extParts[0];
+      detailedExtensions = has9 ? "9" : (has11 ? "11" : "13");
+    }
+  } else {
+    // Outros tipos (dim, aug, etc.)
+    symbol += formula.symbol;
+    if (has9 || has11 || has13) {
+      let extParts = [];
+      if (has9) extParts.push("9");
+      if (has11) extParts.push("11");
+      if (has13) extParts.push("13");
+      symbol += `(${extParts.join(",")})`;
+      detailedExtensions = extParts.join(", ");
+    }
+  }
+
+  const detailedName = detailedExtensions 
+    ? `${root} ${formula.name} com ${detailedExtensions}`
+    : `${root} ${formula.name}`;
 
   return {
     root,
     symbol,
-    detailedName: `${root} ${formula.name} ${extString ? `com ${extString}` : ''}`,
+    detailedName,
     notes,
     intervals
   };

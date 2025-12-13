@@ -132,6 +132,7 @@ export const ChordsPage: React.FC = () => {
         root={root}
         chordType={chordType}
         chordSymbol={chordData.symbol}
+        extensions={extensions}
       />
     </div>
   );

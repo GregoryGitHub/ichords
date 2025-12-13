@@ -9,6 +9,7 @@ interface GuitarChordModalProps {
   root: NoteName;
   chordType: string; // key from CHORD_FORMULAS
   chordSymbol: string;
+  extensions?: number[]; // Selected tension extensions (14 for 9th, 17 for 11th, 21 for 13th)
 }
 
 // Definição dos Shapes (Formatos) baseados no sistema CAGED
@@ -71,10 +72,114 @@ const SHAPES: Record<string, ChordShape[]> = {
   ],
   'aug': [
      { name: "Aumentado", baseString: 6, frets: [0, -1, 2, 1, 1, -1], fingers: [1, 0, 3, 2, 2, 0] } 
+  ],
+  // Acordes com 9ª
+  'add9': [ // Maior com 9ª (sem 7ª) - ex: Cadd9
+    { name: "Formato de Cadd9 (CAGED)", baseString: 5, frets: [-1, 3, 2, 0, 3, 3], fingers: [0, 2, 1, 0, 3, 4], rootFretOffset: 3 },
+    { name: "Formato de Aadd9 (CAGED)", baseString: 5, frets: [-1, 0, 2, 4, 2, 0], fingers: [0, 0, 1, 4, 2, 0] },
+    { name: "Formato de Gadd9 (CAGED)", baseString: 6, frets: [3, 2, 0, 2, 3, 3], fingers: [2, 1, 0, 1, 3, 4], rootFretOffset: 3 },
+    { name: "Formato de Eadd9 (CAGED)", baseString: 6, frets: [0, 2, 2, 1, 0, 2], fingers: [0, 2, 3, 1, 0, 4] },
+    { name: "Formato de Dadd9 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 3, 0], fingers: [0, 0, 0, 1, 3, 0] }
+  ],
+  'dom9': [ // Dominante com 9ª (ex: C9)
+    { name: "Formato de C9 (CAGED)", baseString: 5, frets: [-1, 3, 2, 3, 3, 0], fingers: [0, 2, 1, 3, 4, 0], rootFretOffset: 3 },
+    { name: "Formato de A9 (CAGED)", baseString: 5, frets: [-1, 0, 2, 4, 2, 0], fingers: [0, 0, 1, 3, 2, 0] },
+    { name: "Formato de G9 (CAGED)", baseString: 6, frets: [3, -1, 3, 2, 3, 3], fingers: [1, 0, 3, 2, 4, 4], rootFretOffset: 3 },
+    { name: "Formato de E9 (CAGED)", baseString: 6, frets: [0, 2, 0, 1, 0, 2], fingers: [0, 2, 0, 1, 0, 3] },
+    { name: "Formato de D9 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 1, 0], fingers: [0, 0, 0, 2, 1, 0] }
+  ],
+  'maj9': [ // Maior com 9ª
+    { name: "Formato de Cmaj9 (CAGED)", baseString: 5, frets: [-1, 3, 2, 4, 3, 0], fingers: [0, 2, 1, 4, 3, 0], rootFretOffset: 3 },
+    { name: "Formato de Amaj9 (CAGED)", baseString: 5, frets: [-1, 0, 2, 1, 0, 0], fingers: [0, 0, 3, 2, 0, 0] },
+    { name: "Formato de Gmaj9 (CAGED)", baseString: 6, frets: [3, 2, 0, 0, 0, 2], fingers: [3, 2, 0, 0, 0, 4], rootFretOffset: 3 },
+    { name: "Formato de Emaj9 (CAGED)", baseString: 6, frets: [0, 2, 1, 1, 0, 2], fingers: [0, 3, 1, 2, 0, 4] },
+    { name: "Formato de Dmaj9 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 2, 0], fingers: [0, 0, 0, 1, 2, 0] }
+  ],
+  'madd9': [ // Menor com 9ª (sem 7ª) - ex: Cmadd9
+    { name: "Formato de Cmadd9 (CAGED)", baseString: 5, frets: [-1, 3, 1, 0, 3, 3], fingers: [0, 2, 1, 0, 3, 4], rootFretOffset: 3 },
+    { name: "Formato de Amadd9 (CAGED)", baseString: 5, frets: [-1, 0, 2, 4, 1, 0], fingers: [0, 0, 2, 4, 1, 0] },
+    { name: "Formato de Gmadd9 (CAGED)", baseString: 6, frets: [3, 1, 0, 2, 3, 3], fingers: [2, 1, 0, 1, 3, 4], rootFretOffset: 3 },
+    { name: "Formato de Emadd9 (CAGED)", baseString: 6, frets: [0, 2, 2, 0, 0, 2], fingers: [0, 2, 3, 0, 0, 4] },
+    { name: "Formato de Dmadd9 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 3, 0], fingers: [0, 0, 0, 1, 3, 0] }
+  ],
+  'm9': [ // Menor com 7ª e 9ª
+    { name: "Formato de Cm9 (CAGED)", baseString: 5, frets: [-1, 3, 1, 3, 3, 0], fingers: [0, 2, 1, 3, 4, 0], rootFretOffset: 3 },
+    { name: "Formato de Am9 (CAGED)", baseString: 5, frets: [-1, 0, 2, 4, 1, 3], fingers: [0, 0, 1, 4, 1, 3] },
+    { name: "Formato de Gm9 (CAGED)", baseString: 6, frets: [3, 1, 3, 3, 3, 3], fingers: [1, 0, 2, 3, 3, 3], rootFretOffset: 3 },
+    { name: "Formato de Em9 (CAGED)", baseString: 6, frets: [0, 2, 0, 0, 0, 2], fingers: [0, 2, 0, 0, 0, 3] },
+    { name: "Formato de Dm9 (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 1, 0], fingers: [0, 0, 0, 2, 1, 0] }
+  ],
+  // Acordes com 11ª
+  'dom7add11': [ // Dominante com 11ª (ex: C7(11))
+    { name: "Formato de C7(11)", baseString: 5, frets: [-1, 3, 3, 3, 1, 1], fingers: [0, 2, 3, 4, 1, 1], rootFretOffset: 3 },
+    { name: "Formato de A7(11)", baseString: 5, frets: [-1, 0, 0, 0, 2, 0], fingers: [0, 0, 0, 0, 1, 0] },
+    { name: "Formato de G7(11)", baseString: 6, frets: [3, 0, 3, 0, 1, 1], fingers: [3, 0, 4, 0, 1, 2], rootFretOffset: 3 },
+    { name: "Formato de E7(11)", baseString: 6, frets: [0, 0, 0, 1, 0, 0], fingers: [0, 0, 0, 1, 0, 0] },
+    { name: "Formato de D7(11)", baseString: 4, frets: [-1, -1, 0, 0, 1, 0], fingers: [0, 0, 0, 0, 1, 0] }
+  ],
+  // Acordes com 13ª
+  'dom7add13': [ // Dominante com 13ª (ex: C7(13))
+    { name: "Formato de C7(13)", baseString: 5, frets: [-1, 3, 2, 3, 5, 5], fingers: [0, 2, 1, 3, 4, 4], rootFretOffset: 3 },
+    { name: "Formato de A7(13)", baseString: 5, frets: [-1, 0, 2, 0, 2, 2], fingers: [0, 0, 2, 0, 3, 4] },
+    { name: "Formato de G7(13)", baseString: 6, frets: [3, -1, 3, 2, 3, 5], fingers: [1, 0, 2, 1, 3, 4], rootFretOffset: 3 },
+    { name: "Formato de E7(13)", baseString: 6, frets: [0, 2, 0, 1, 2, 2], fingers: [0, 2, 0, 1, 3, 4] },
+    { name: "Formato de D7(13)", baseString: 4, frets: [-1, -1, 0, 2, 1, 2], fingers: [0, 0, 0, 3, 1, 4] }
+  ],
+  // Acordes com 9ª e 11ª
+  'dom9add11': [ // Dominante com 9ª e 11ª
+    { name: "Formato de C9(11)", baseString: 5, frets: [-1, 3, 3, 3, 3, 0], fingers: [0, 1, 1, 1, 1, 0], rootFretOffset: 3 },
+    { name: "Formato de A9(11)", baseString: 5, frets: [-1, 0, 0, 0, 0, 0], fingers: [0, 0, 0, 0, 0, 0] },
+    { name: "Formato de E9(11)", baseString: 6, frets: [0, 0, 0, 1, 0, 2], fingers: [0, 0, 0, 1, 0, 2] },
+  ],
+  // Acordes com 9ª e 13ª
+  'dom9add13': [ // Dominante com 9ª e 13ª (ex: C13)
+    { name: "Formato de C13", baseString: 5, frets: [-1, 3, 2, 3, 5, 5], fingers: [0, 2, 1, 3, 4, 4], rootFretOffset: 3 },
+    { name: "Formato de A13", baseString: 5, frets: [-1, 0, 2, 0, 2, 2], fingers: [0, 0, 2, 0, 3, 4] },
+    { name: "Formato de E13", baseString: 6, frets: [0, 2, 0, 1, 2, 2], fingers: [0, 2, 0, 1, 3, 4] },
   ]
 };
 
-export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onClose, root, chordType, chordSymbol }) => {
+// Helper para determinar o tipo de shape baseado no tipo base + extensões
+const getShapeType = (baseType: string, extensions: number[] = []): string => {
+  const has9 = extensions.includes(14);
+  const has11 = extensions.includes(17);
+  const has13 = extensions.includes(21);
+  
+  // Tríade maior com tensões
+  if (baseType === 'major') {
+    if (has9) return 'add9'; // Cadd9
+  }
+  
+  // Tríade menor com tensões
+  if (baseType === 'minor') {
+    if (has9) return 'madd9'; // Cmadd9
+  }
+  
+  // Dominantes com tensões
+  if (baseType === 'dom7') {
+    if (has9 && has11 && has13) return 'dom9add13'; // C13 completo
+    if (has9 && has13) return 'dom9add13'; // C13
+    if (has9 && has11) return 'dom9add11'; // C9(11)
+    if (has13) return 'dom7add13'; // C7(13)
+    if (has11) return 'dom7add11'; // C7(11)
+    if (has9) return 'dom9'; // C9
+  }
+  
+  // Maior com sétima + tensões
+  if (baseType === 'maj7') {
+    if (has9) return 'maj9'; // Cmaj9
+  }
+  
+  // Menor com sétima + tensões
+  if (baseType === 'm7') {
+    if (has9) return 'm9'; // Cm9
+  }
+  
+  // Se não tem tensões ou não tem shape específico, retornar o tipo base
+  return baseType;
+};
+
+export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onClose, root, chordType, chordSymbol, extensions }) => {
   const [variationIndex, setVariationIndex] = useState(0);
 
   // Reset variation when chord changes
@@ -88,8 +193,11 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
 
     const rootIndex = CHROMATIC_SCALE.indexOf(root);
     
-    // Tenta encontrar shapes disponíveis para o tipo
-    let shapes = SHAPES[chordType] || SHAPES['major']; 
+    // Determinar o tipo de shape baseado nas extensões
+    const shapeType = getShapeType(chordType, extensions);
+    
+    // Tenta encontrar shapes disponíveis para o tipo (com ou sem tensões)
+    let shapes = SHAPES[shapeType] || SHAPES[chordType] || SHAPES['major']; 
     
     // Garante que o index é válido (loop circular)
     const validIndex = Math.abs(variationIndex) % shapes.length;
@@ -149,7 +257,7 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
       currentIndex: validIndex
     };
 
-  }, [root, chordType, variationIndex]);
+  }, [root, chordType, variationIndex, extensions]);
 
   if (!isOpen || !chordConfig) return null;
 
