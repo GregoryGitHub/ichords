@@ -29,21 +29,21 @@ export const ChromaticLine: React.FC<ChromaticLineProps> = ({ root, activeInterv
   };
 
   return (
-    <div className="w-full bg-slate-800/50 rounded-xl p-4 my-6 border border-slate-700 overflow-hidden relative">
+    <div className="w-full bg-slate-800/50 rounded-xl p-4 pb-6 mb-6 border border-slate-700 overflow-visible relative">
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-slate-600 to-transparent opacity-20"></div>
       
-      <div className="flex justify-between items-end relative h-24">
+      <div className="flex justify-between items-center relative min-h-24">
         {reorderedNotes.map((note, index) => {
           // Find if this note (by index relative to root) is active
           // semitones = index because we reordered the array starting at root
           const activeInterval = activeIntervals.find(i => i.semitones === index || i.semitones === index + 12); // +12 for extensions visual mapping
           
           return (
-            <div key={`${note}-${index}`} className="flex flex-col items-center flex-1 relative group">
+            <div key={`${note}-${index}`} className="flex flex-col items-center justify-center flex-1 relative group">
               
               {/* Connection Line segment (except last) */}
               {index < 11 && (
-                <div className="absolute top-[60%] left-1/2 w-full h-0.5 bg-slate-700 -z-10"></div>
+                <div className="absolute top-1/2 left-1/2 w-full h-0.5 bg-slate-700 -z-10 -translate-y-1/2"></div>
               )}
 
               {/* Note Name */}
@@ -60,7 +60,7 @@ export const ChromaticLine: React.FC<ChromaticLineProps> = ({ root, activeInterv
 
               {/* Interval Label (Popup/Bubble) */}
               <div className={`
-                absolute bottom-0 transform translate-y-full pt-2 transition-all duration-300
+                absolute top-full transform pt-2 transition-all duration-300
                 ${activeInterval ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
               `}>
                 <span className={`
