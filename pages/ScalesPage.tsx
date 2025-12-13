@@ -2,7 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { NoteSelector } from '../components/NoteSelector';
 import { ChromaticLine } from '../components/ChromaticLine';
 import { InfoCard } from '../components/InfoCard';
+import { ScaleTablature } from '../components/ScaleTablature';
 import { generateScale } from '../core/musicTheory';
+import { generateScalePositions } from '../core/scalePositions';
 import { SCALE_PATTERNS } from '../constants';
 import { NoteName } from '../types';
 
@@ -12,6 +14,12 @@ export const ScalesPage: React.FC = () => {
 
   const scaleData = useMemo(() => generateScale(root, scaleType), [root, scaleType]);
   const currentPattern = SCALE_PATTERNS.find(p => p.name === scaleType);
+  
+  // Gerar as 5 posições CAGED da escala
+  const scalePositions = useMemo(() => 
+    generateScalePositions(root, scaleData.notes), 
+    [root, scaleData.notes]
+  );
 
   return (
     <div className="pb-24 animate-in fade-in duration-500">
@@ -61,6 +69,13 @@ export const ScalesPage: React.FC = () => {
           </p>
         </div>
       </section>
+
+      {/* Digitações da Escala */}
+      <ScaleTablature 
+        root={root}
+        scaleNotes={scaleData.notes}
+        positions={scalePositions}
+      />
     </div>
   );
 };
