@@ -38,5 +38,6 @@ export interface Chord {
 export enum PageView {
   SCALES = 'scales',
   CHORDS = 'chords',
-  HARMONY = 'harmony'
+  HARMONY = 'harmony',
+  ADMIN = 'admin'
 }

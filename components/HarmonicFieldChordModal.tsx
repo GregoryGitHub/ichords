@@ -1,8 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { NoteName, Chord } from '../types';
 import { CHROMATIC_SCALE } from '../constants';
 import { X } from 'lucide-react';
 import { ChromaticLine } from './ChromaticLine';
+import { useShapes } from '../hooks/useShapes';
 
 interface HarmonicFieldChordModalProps {
   isOpen: boolean;
@@ -241,12 +242,25 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
   chord,
   degree 
 }) => {
+  const [openTimestamp, setOpenTimestamp] = useState(0);
+
   const chordType = getChordTypeFromSymbol(chord.symbol);
-  const shapes = SHAPES[chordType] || SHAPES['major'];
+
+  // Atualizar timestamp quando modal abre OU quando tipo de acorde muda
+  useEffect(() => {
+    if (isOpen) {
+      setOpenTimestamp(Date.now());
+    }
+  }, [isOpen, chordType]);
+  
+  // Buscar shapes do Firebase com fallback para shapes hardcoded
+  // Usa timestamp + chordType para garantir reload correto
+  const fallbackShapes = SHAPES[chordType] || SHAPES['major'];
+  const shapes = useShapes(chordType, fallbackShapes, openTimestamp);
 
   const chordDiagrams = useMemo(() => {
     return shapes.map(shape => calculateChordDiagram(chord.root, shape));
-  }, [chord.root, chordType]);
+  }, [chord.root, shapes]);
 
   if (!isOpen) return null;
 

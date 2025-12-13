@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { NoteName } from '../types';
 import { CHROMATIC_SCALE } from '../constants';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useShapes } from '../hooks/useShapes';
 
 interface GuitarChordModalProps {
   isOpen: boolean;
@@ -181,6 +182,22 @@ const getShapeType = (baseType: string, extensions: number[] = []): string => {
 
 export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onClose, root, chordType, chordSymbol, extensions }) => {
   const [variationIndex, setVariationIndex] = useState(0);
+  const [openTimestamp, setOpenTimestamp] = useState(0);
+
+  // Determinar o tipo de shape baseado nas extensões
+  const shapeType = getShapeType(chordType, extensions);
+
+  // Atualizar timestamp quando modal abre OU quando tipo de acorde muda
+  useEffect(() => {
+    if (isOpen) {
+      setOpenTimestamp(Date.now());
+    }
+  }, [isOpen, shapeType]);
+  
+  // Buscar shapes do Firebase com fallback para shapes hardcoded
+  // Usa timestamp + shapeType para garantir reload correto
+  const fallbackShapes = SHAPES[shapeType] || SHAPES[chordType] || SHAPES['major'];
+  const shapes = useShapes(shapeType, fallbackShapes, openTimestamp);
 
   // Reset variation when chord changes
   useEffect(() => {
@@ -191,13 +208,7 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
   const chordConfig = useMemo(() => {
     if (!root) return null;
 
-    const rootIndex = CHROMATIC_SCALE.indexOf(root);
-    
-    // Determinar o tipo de shape baseado nas extensões
-    const shapeType = getShapeType(chordType, extensions);
-    
-    // Tenta encontrar shapes disponíveis para o tipo (com ou sem tensões)
-    let shapes = SHAPES[shapeType] || SHAPES[chordType] || SHAPES['major']; 
+    const rootIndex = CHROMATIC_SCALE.indexOf(root); 
     
     // Garante que o index é válido (loop circular)
     const validIndex = Math.abs(variationIndex) % shapes.length;

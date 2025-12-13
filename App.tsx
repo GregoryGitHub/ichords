@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { ScalesPage } from './pages/ScalesPage';
 import { ChordsPage } from './pages/ChordsPage';
 import { HarmonicFieldPage } from './pages/HarmonicFieldPage';
+import { AdminPage } from './pages/AdminPage';
 import { PageView } from './types';
-import { Music, Grid, Layers } from 'lucide-react';
+import { Music, Grid, Layers, Settings } from 'lucide-react';
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageView>(PageView.SCALES);
@@ -13,6 +14,7 @@ const App: React.FC = () => {
       case PageView.SCALES: return <ScalesPage />;
       case PageView.CHORDS: return <ChordsPage />;
       case PageView.HARMONY: return <HarmonicFieldPage />;
+      case PageView.ADMIN: return <AdminPage />;
       default: return <ScalesPage />;
     }
   };
@@ -51,6 +53,14 @@ const App: React.FC = () => {
           >
             <Grid size={24} />
             <span className="text-[10px] font-medium uppercase tracking-wide">Campo H.</span>
+          </button>
+
+          <button 
+            onClick={() => setCurrentPage(PageView.ADMIN)}
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${currentPage === PageView.ADMIN ? 'text-brand-500' : 'text-slate-500'}`}
+          >
+            <Settings size={24} />
+            <span className="text-[10px] font-medium uppercase tracking-wide">Admin</span>
           </button>
 
         </div>
