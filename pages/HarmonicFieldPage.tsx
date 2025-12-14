@@ -101,6 +101,8 @@ export const HarmonicFieldPage: React.FC = () => {
           }}
           chord={selectedChord.chord}
           degree={selectedChord.degree}
+          harmonicFieldRoot={root}
+          mode={mode}
         />
       )}
     </div>

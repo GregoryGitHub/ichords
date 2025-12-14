@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { NoteName, Chord } from '../types';
 import { CHROMATIC_SCALE } from '../constants';
 import { X } from 'lucide-react';
-import { ChromaticLine } from './ChromaticLine';
+import { ScaleLine } from './ScaleLine';
 import { useShapes } from '../hooks/useShapes';
 
 interface HarmonicFieldChordModalProps {
@@ -10,6 +10,8 @@ interface HarmonicFieldChordModalProps {
   onClose: () => void;
   chord: Chord;
   degree: string;
+  harmonicFieldRoot: NoteName;
+  mode: 'major' | 'minor';
 }
 
 // Definição dos Shapes (Formatos) baseados no sistema CAGED
@@ -240,7 +242,9 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
   isOpen, 
   onClose, 
   chord,
-  degree 
+  degree,
+  harmonicFieldRoot,
+  mode
 }) => {
   const [openTimestamp, setOpenTimestamp] = useState(0);
 
@@ -284,9 +288,9 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
           <p className="text-sm text-slate-400">{chord.detailedName}</p>
         </div>
 
-        {/* Chromatic Line */}
+        {/* Scale Line */}
         <div className="mb-6">
-          <ChromaticLine root={chord.root} activeIntervals={chord.intervals} />
+          <ScaleLine root={harmonicFieldRoot} mode={mode} chord={chord} />
         </div>
 
         {/* CAGED Shapes Grid */}
