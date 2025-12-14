@@ -22,7 +22,7 @@ export const ScalesPage: React.FC = () => {
   );
 
   return (
-    <div className="pb-24 animate-in fade-in duration-500">
+    <div className="pb-6 animate-in fade-in duration-500">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-white">Escalas</h1>
         <p className="text-slate-400 text-sm">Entenda como as escalas são formadas.</p>

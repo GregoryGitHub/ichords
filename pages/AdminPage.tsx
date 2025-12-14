@@ -463,7 +463,7 @@ export const AdminPage: React.FC = () => {
   const selectedTypeData = shapeTypes.find(t => t.id === selectedType);
 
   return (
-    <div className="pb-24 animate-in fade-in duration-500">
+    <div className="pb-6 animate-in fade-in duration-500">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>

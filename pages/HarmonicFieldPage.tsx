@@ -26,7 +26,7 @@ export const HarmonicFieldPage: React.FC = () => {
   };
 
   return (
-    <div className="pb-24 animate-in fade-in duration-500">
+    <div className="pb-6 animate-in fade-in duration-500">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-white">Campo Harmônico</h1>
         <p className="text-slate-400 text-sm">A família de acordes de uma tonalidade.</p>

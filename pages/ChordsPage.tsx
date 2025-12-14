@@ -24,7 +24,7 @@ export const ChordsPage: React.FC = () => {
   const currentFormula = CHORD_FORMULAS[chordType];
 
   return (
-    <div className="pb-24 animate-in fade-in duration-500">
+    <div className="pb-6 animate-in fade-in duration-500">
       <header className="mb-6">
         <h1 className="text-2xl font-bold text-white">Acordes</h1>
         <p className="text-slate-400 text-sm">Monte acordes e adicione extensões.</p>

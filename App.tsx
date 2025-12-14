@@ -20,16 +20,22 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center">
+    <div className="h-screen h-[100dvh] bg-slate-950 text-slate-100 flex flex-col items-center overflow-hidden">
       
       {/* Main Content Area */}
-      <main className="w-full max-w-md flex-1 p-4 pb-0">
+      <main
+        className="w-full max-w-md flex-1 min-h-0 p-4 overflow-y-auto overscroll-contain"
+        style={{ WebkitOverflowScrolling: 'touch' }}
+      >
         {renderPage()}
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 w-full bg-slate-900/90 backdrop-blur-md border-t border-slate-800 z-50">
-        <div className="max-w-md mx-auto flex justify-around items-center h-20 px-2 pb-2">
+      <nav className="w-full bg-slate-900/90 backdrop-blur-md border-t border-slate-800 z-50">
+        <div
+          className="max-w-md mx-auto flex justify-around items-center min-h-20 px-2 pt-2"
+          style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+        >
           
           <button 
             onClick={() => setCurrentPage(PageView.SCALES)}
