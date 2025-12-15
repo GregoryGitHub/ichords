@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { NoteSelector } from '../components/NoteSelector';
-import { generateHarmonicField } from '../core/musicTheory';
+import { generateHarmonicField, generateModalInterchange } from '../core/musicTheory';
 import { HarmonicFieldChordModal } from '../components/HarmonicFieldChordModal';
 import { NoteName, Chord } from '../types';
 import { ChevronRight } from 'lucide-react';
@@ -13,6 +13,7 @@ export const HarmonicFieldPage: React.FC = () => {
   const [selectedChord, setSelectedChord] = useState<{ chord: Chord; degree: string } | null>(null);
 
   const harmonicField = useMemo(() => generateHarmonicField(root, mode), [root, mode]);
+  const modalInterchange = useMemo(() => generateModalInterchange(root, mode), [root, mode]);
 
   // Descriptions for why chords are the way they are
   const getDidacticText = (degree: string) => {
@@ -34,15 +35,15 @@ export const HarmonicFieldPage: React.FC = () => {
 
       <section className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 mb-6">
         <NoteSelector selectedNote={root} onSelect={setRoot} label="Tom" />
-        
+
         <div className="flex bg-slate-800 p-1 rounded-lg mt-4">
-          <button 
+          <button
             onClick={() => setMode('major')}
             className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${mode === 'major' ? 'bg-brand-600 text-white shadow' : 'text-slate-400'}`}
           >
             Maior
           </button>
-          <button 
+          <button
             onClick={() => setMode('minor')}
             className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${mode === 'minor' ? 'bg-brand-600 text-white shadow' : 'text-slate-400'}`}
           >
@@ -53,8 +54,8 @@ export const HarmonicFieldPage: React.FC = () => {
 
       <div className="space-y-3">
         {harmonicField.map((slot, idx) => (
-          <div 
-            key={idx} 
+          <div
+            key={idx}
             onClick={() => {
               setSelectedChord({ chord: slot.chord, degree: slot.degree });
               setIsModalOpen(true);
@@ -72,22 +73,51 @@ export const HarmonicFieldPage: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex flex-col items-end">
-               <span className="text-[10px] text-brand-400 font-medium uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
-                 {getDidacticText(slot.degree)}
-               </span>
-               <ChevronRight className="text-slate-600" size={20} />
+              <span className="text-[10px] text-brand-400 font-medium uppercase tracking-wide opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
+                {getDidacticText(slot.degree)}
+              </span>
+              <ChevronRight className="text-slate-600" size={20} />
             </div>
           </div>
         ))}
       </div>
 
+      <div className="mt-8 mb-4">
+        <h2 className="text-xl font-bold text-white mb-1">Empréstimos Modais Comuns</h2>
+        <p className="text-slate-400 text-sm mb-4">Acordes de outras escalas frequentemente usados neste tom.</p>
+
+        <div className="grid grid-cols-2 gap-3">
+          {modalInterchange.map((slot, idx) => (
+            <div
+              key={idx}
+              onClick={() => {
+                setSelectedChord({ chord: slot.chord, degree: slot.degree });
+                setIsModalOpen(true);
+              }}
+              className="bg-slate-800/60 rounded-lg p-3 border border-slate-700/50 flex flex-col hover:bg-slate-750 transition-colors cursor-pointer"
+            >
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-xs font-serif italic text-slate-500">{slot.degree}</span>
+                <span className="text-[10px] uppercase tracking-wider text-brand-400 font-medium bg-brand-900/30 px-1.5 py-0.5 rounded border border-brand-800/30">
+                  {slot.origin}
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-white">{slot.chord.symbol}</h3>
+              <p className="text-[10px] text-slate-400 truncate">
+                {slot.chord.intervals.map(i => i.shortName).join(' - ')}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="mt-8 p-5 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl border border-slate-700">
         <h3 className="text-white font-bold mb-2">Por que esses acordes?</h3>
         <p className="text-slate-400 text-sm leading-relaxed">
-          O Campo Harmônico é formado apenas empilhando terças usando <strong>somente as notas da escala</strong> que você escolheu ({root} {mode === 'major' ? 'Maior' : 'Menor'}). 
-          <br/><br/>
+          O Campo Harmônico é formado apenas empilhando terças usando <strong>somente as notas da escala</strong> que você escolheu ({root} {mode === 'major' ? 'Maior' : 'Menor'}).
+          <br /><br />
           Por exemplo, no tom de Dó Maior, o acorde de Ré é menor (Dm) porque a terça maior de Ré (F#) não existe na escala de Dó. Temos que usar o Fá natural, resultando numa terça menor.
         </p>
       </div>

@@ -67,3 +67,21 @@ export const HARMONIC_FIELD_PATTERNS = {
     { degree: 'VII', type: 'dom7' },
   ]
 };
+
+export const MODAL_INTERCHANGE_PATTERNS = {
+  major: [
+    { degree: 'bII', type: 'maj7', interval: 1, origin: 'Frígio' },
+    { degree: 'bIII', type: 'maj7', interval: 3, origin: 'Eólio' },
+    { degree: 'iv', type: 'm7', interval: 5, origin: 'Eólio' },
+    { degree: 'V7/IV', type: 'dom7', interval: 0, origin: 'Dominante Secundário' },
+    { degree: 'v', type: 'm7', interval: 7, origin: 'Mixolídio' },
+    { degree: 'bVI', type: 'maj7', interval: 8, origin: 'Eólio' },
+    { degree: 'bVII', type: 'dom7', interval: 10, origin: 'Eólio' }
+  ],
+  minor: [
+    { degree: 'bII', type: 'maj7', interval: 1, origin: 'Frígio' },
+    { degree: 'I', type: 'maj7', interval: 0, origin: 'Jônico (Picardy)' },
+    { degree: 'ii', type: 'm7', interval: 2, origin: 'Dórico' },
+    { degree: 'IV', type: 'dom7', interval: 5, origin: 'Dórico' }
+  ]
+};

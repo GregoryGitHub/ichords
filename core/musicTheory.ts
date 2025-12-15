@@ -1,4 +1,4 @@
-import { CHROMATIC_SCALE, INTERVALS_MAP, SCALE_PATTERNS, CHORD_FORMULAS, HARMONIC_FIELD_PATTERNS } from '../constants';
+import { CHROMATIC_SCALE, INTERVALS_MAP, SCALE_PATTERNS, CHORD_FORMULAS, HARMONIC_FIELD_PATTERNS, MODAL_INTERCHANGE_PATTERNS } from '../constants';
 import { NoteName, Interval, Scale, Chord, ScalePattern } from '../types';
 
 // Helper to handle circular indexing of the chromatic scale
@@ -25,16 +25,16 @@ export const generateScale = (root: NoteName, patternName: string): Scale => {
 
 // Generate Chord Data
 export const generateChord = (
-  root: NoteName, 
-  baseType: string, 
+  root: NoteName,
+  baseType: string,
   extensions: number[] = [] // Array of extra semitones (e.g. 14 for 9th)
 ): Chord => {
   const formula = CHORD_FORMULAS[baseType];
-  
+
   // Combine base intervals with extension intervals
   // We use a Set to avoid duplicates if user selects something weird, though UI should prevent it
   const allSemitones = Array.from(new Set([...formula.intervals, ...extensions])).sort((a, b) => a - b);
-  
+
   const intervals: Interval[] = allSemitones.map(semitone => {
     // Handle intervals > 12 by mapping them to their simple interval for naming if needed
     // or keep extended map in constants.
@@ -121,7 +121,7 @@ export const generateChord = (
     }
   }
 
-  const detailedName = detailedExtensions 
+  const detailedName = detailedExtensions
     ? `${root} ${formula.name} com ${detailedExtensions}`
     : `${root} ${formula.name}`;
 
@@ -146,6 +146,26 @@ export const generateHarmonicField = (root: NoteName, type: 'major' | 'minor') =
     return {
       degree: slot.degree,
       chord: chord
+    };
+  });
+};
+
+// Generate Modal Interchange Chords
+export const generateModalInterchange = (root: NoteName, type: 'major' | 'minor') => {
+  const patterns = MODAL_INTERCHANGE_PATTERNS[type];
+
+  return patterns.map(pattern => {
+    // Determine the root of the borrowed chord based on the interval offset
+    const chordRoot = getNoteAtOffset(root, pattern.interval);
+
+    // Generate the full chord object
+    // We treat 'V7/IV' special or just rely on the fact it's a dom7 built on 'root' (if interval is 0, it means it's built on tonic)
+    const chord = generateChord(chordRoot, pattern.type);
+
+    return {
+      degree: pattern.degree,
+      chord: chord,
+      origin: pattern.origin
     };
   });
 };
