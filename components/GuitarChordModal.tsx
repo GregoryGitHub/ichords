@@ -329,7 +329,7 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
         </div>
 
         {/* Diagrama SVG */}
-        <div className="relative bg-white rounded-lg p-2 shadow-lg mb-2">
+        <div className="relative bg-slate-900 rounded-lg p-2 shadow-lg mb-2 border border-slate-800">
            <svg width={SVG_WIDTH} height={SVG_HEIGHT} viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}>
               {/* Defs para sombras */}
               <defs>
@@ -340,14 +340,14 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
 
               {/* Casa Inicial Indicador (ex: 5ª casa) */}
               {chordConfig.startFret > 1 && (
-                <text x={MARGIN_X - 12} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-500 text-sm font-bold font-sans">
+                <text x={MARGIN_X - 12} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-400 text-sm font-bold font-sans">
                   {chordConfig.startFret}ª
                 </text>
               )}
 
               {/* NUT (Pestana superior) */}
               {chordConfig.startFret === 1 && (
-                <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={5} fill="#334155" />
+                <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={5} fill="#94a3b8" />
               )}
 
               {/* Frets (Linhas Horizontais) */}
@@ -358,7 +358,7 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
                   y1={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
                   x2={MARGIN_X + STRING_SPACING * 5}
                   y2={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
-                  stroke="#94a3b8"
+                  stroke="#475569"
                   strokeWidth={i === 0 && chordConfig.startFret > 1 ? 2 : 1} // Top line slightly thicker if not nut
                 />
               ))}
@@ -371,7 +371,7 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
                   y1={MARGIN_Y}
                   x2={MARGIN_X + i * STRING_SPACING}
                   y2={MARGIN_Y + NUM_FRETS * FRET_SPACING}
-                  stroke="#475569"
+                  stroke="#64748b"
                   strokeWidth={i > 2 ? 1 : 1.5} // Cordas graves mais grossas
                 />
               ))}
@@ -384,13 +384,13 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
                 // Indicadores X ou O acima do nut
                 if (fret === -1) {
                   return (
-                    <text key={`x-${stringIndex}`} x={x} y={MARGIN_Y - 10} textAnchor="middle" className="fill-slate-400 text-xs font-sans font-bold">X</text>
+                    <text key={`x-${stringIndex}`} x={x} y={MARGIN_Y - 10} textAnchor="middle" className="fill-slate-500 text-xs font-sans font-bold">X</text>
                   );
                 }
                 if (fret === 0) {
                   // Corda solta mas tocada
                   return (
-                    <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 14} r={4} fill="none" stroke="#64748b" strokeWidth={2} />
+                    <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 14} r={4} fill="none" stroke="#94a3b8" strokeWidth={2} />
                   );
                 }
 

@@ -111,33 +111,31 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
           <button
             type="button"
             onClick={() => updateViewMode('diagram')}
-            className={`px-3 py-2 text-xs font-semibold transition-colors ${
-              viewMode === 'diagram' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-            }`}
+            className={`px-3 py-2 text-xs font-semibold transition-colors ${viewMode === 'diagram' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+              }`}
           >
             Diagrama
           </button>
           <button
             type="button"
             onClick={() => updateViewMode('tab')}
-            className={`px-3 py-2 text-xs font-semibold transition-colors ${
-              viewMode === 'tab' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-slate-800'
-            }`}
+            className={`px-3 py-2 text-xs font-semibold transition-colors ${viewMode === 'tab' ? 'bg-brand-600 text-white' : 'text-slate-300 hover:bg-slate-800'
+              }`}
           >
             Tablatura
           </button>
         </div>
       </div>
-      
+
       {/* Navigation Controls */}
       <div className="flex items-center justify-between mb-4 bg-slate-800/50 p-3 rounded-lg">
-        <button 
+        <button
           onClick={prevPosition}
           className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
-        
+
         <div className="flex flex-col items-center">
           <span className="text-slate-200 text-sm font-semibold text-center">
             {currentPosition.name}
@@ -147,7 +145,7 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
           </span>
         </div>
 
-        <button 
+        <button
           onClick={nextPosition}
           className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 transition-colors"
         >
@@ -157,12 +155,12 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
 
       {viewMode === 'diagram' ? (
         /* Diagrama SVG */
-        <div className="relative bg-white rounded-lg p-4 shadow-lg">
+        <div className="relative bg-slate-900 rounded-lg p-4 shadow-lg border border-slate-800">
           <svg width={SVG_WIDTH} height={SVG_HEIGHT} viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}>
             {/* Defs para sombras */}
             <defs>
               <filter id="shadow-scale" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.25"/>
+                <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.25" />
               </filter>
             </defs>
 
@@ -172,7 +170,7 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
                 x={MARGIN_X}
                 y={MARGIN_Y - 26}
                 textAnchor="start"
-                className="fill-slate-500 text-xs font-bold font-sans"
+                className="fill-slate-400 text-xs font-bold font-sans"
               >
                 {currentPosition.startFret}ª casa
               </text>
@@ -180,12 +178,12 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
 
             {/* NUT (Pestana superior) - apenas se startFret === 1 */}
             {currentPosition.startFret === 1 && (
-              <rect 
-                x={MARGIN_X} 
-                y={MARGIN_Y - 2} 
-                width={FRET_SPACING * NUM_FRETS} 
-                height={4} 
-                fill="#334155" 
+              <rect
+                x={MARGIN_X}
+                y={MARGIN_Y - 2}
+                width={FRET_SPACING * NUM_FRETS}
+                height={4}
+                fill="#94a3b8"
               />
             )}
 
@@ -197,7 +195,7 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
                 y1={MARGIN_Y}
                 x2={MARGIN_X + i * FRET_SPACING}
                 y2={MARGIN_Y + (NUM_STRINGS - 1) * STRING_SPACING}
-                stroke="#94a3b8"
+                stroke="#475569"
                 strokeWidth={i === 0 ? 3 : 1.5}
               />
             ))}
@@ -210,7 +208,7 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
                 y1={MARGIN_Y + i * STRING_SPACING}
                 x2={MARGIN_X + NUM_FRETS * FRET_SPACING}
                 y2={MARGIN_Y + i * STRING_SPACING}
-                stroke="#475569"
+                stroke="#64748b"
                 strokeWidth={1.5 + (NUM_STRINGS - i) * 0.15} // Cordas graves mais grossas
               />
             ))}
@@ -231,7 +229,7 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
             {/* Notas da escala */}
             {currentPosition.frets.map((stringFrets, stringIndex) => {
               const normalizedFrets = normalizeFretsForDisplay(stringFrets, currentPosition.startFret);
-              
+
               return normalizedFrets.map((fret, fretIndex) => {
                 if (fret < 0 || fret > NUM_FRETS) return null;
 
@@ -251,17 +249,17 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
                 if (fret === 0) {
                   return (
                     <g key={`note-${stringIndex}-${fretIndex}`}>
-                      <circle 
-                        cx={x} 
-                        cy={y} 
-                        r={7} 
-                        className={isRoot ? "fill-brand-500" : "fill-slate-400"}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={7}
+                        className={isRoot ? "fill-brand-500" : "fill-slate-600"}
                         filter="url(#shadow-scale)"
                       />
-                      <text 
-                        x={x} 
-                        y={y + 4} 
-                        textAnchor="middle" 
+                      <text
+                        x={x}
+                        y={y + 4}
+                        textAnchor="middle"
                         className="fill-white text-[10px] font-bold font-sans"
                       >
                         {note}
@@ -273,17 +271,17 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
                 // Nota no braço
                 return (
                   <g key={`note-${stringIndex}-${fretIndex}`}>
-                    <circle 
-                      cx={x} 
-                      cy={y} 
-                      r={9} 
-                      className={isRoot ? "fill-brand-500" : "fill-slate-400"}
+                    <circle
+                      cx={x}
+                      cy={y}
+                      r={9}
+                      className={isRoot ? "fill-brand-500" : "fill-slate-600"}
                       filter="url(#shadow-scale)"
                     />
-                    <text 
-                      x={x} 
-                      y={y + 4} 
-                      textAnchor="middle" 
+                    <text
+                      x={x}
+                      y={y + 4}
+                      textAnchor="middle"
                       className="fill-white text-[10px] font-bold font-sans"
                     >
                       {note}
@@ -333,7 +331,7 @@ export const ScaleTablature: React.FC<ScaleTablatureProps> = ({ root, scaleNotes
 
       <div className="mt-3 p-3 bg-slate-800/50 rounded-lg text-xs text-slate-400">
         <p>
-          <strong className="text-brand-400">Dica:</strong> Cada posição mostra um "desenho" diferente da escala no braço. 
+          <strong className="text-brand-400">Dica:</strong> Cada posição mostra um "desenho" diferente da escala no braço.
           Pratique movendo-se entre as posições para cobrir todo o braço da guitarra.
         </p>
       </div>

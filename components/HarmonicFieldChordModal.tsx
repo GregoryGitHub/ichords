@@ -29,11 +29,11 @@ const SHAPES: Record<string, ChordShape[]> = {
     { name: "Formato de C (CAGED)", baseString: 5, frets: [-1, 3, 2, 0, 1, 0], fingers: [0, 3, 2, 0, 1, 0], rootFretOffset: 3 },
     { name: "Formato de A (CAGED)", baseString: 5, frets: [-1, 0, 2, 2, 2, 0], fingers: [0, 1, 2, 3, 4, 1] },
     { name: "Formato de G (CAGED)", baseString: 6, frets: [3, 2, 0, 0, 0, 3], fingers: [3, 2, 0, 0, 0, 4], rootFretOffset: 3 },
-    { name: "Formato de E (CAGED)", baseString: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] }, 
+    { name: "Formato de E (CAGED)", baseString: 6, frets: [0, 2, 2, 1, 0, 0], fingers: [1, 3, 4, 2, 1, 1] },
     { name: "Formato de D (CAGED)", baseString: 4, frets: [-1, -1, 0, 2, 3, 2], fingers: [0, 0, 0, 1, 3, 2] }
   ],
   'minor': [
-    { name: "Formato de Em", baseString: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] }, 
+    { name: "Formato de Em", baseString: 6, frets: [0, 2, 2, 0, 0, 0], fingers: [1, 3, 4, 1, 1, 1] },
     { name: "Formato de Am", baseString: 5, frets: [-1, 0, 2, 2, 1, 0], fingers: [0, 1, 3, 4, 2, 1] },
     { name: "Formato de Dm", baseString: 4, frets: [-1, -1, 0, 2, 3, 1], fingers: [0, 0, 0, 2, 4, 1] }
   ],
@@ -66,20 +66,20 @@ const SHAPES: Record<string, ChordShape[]> = {
     { name: "Formato de Dm7b5 (CAGED)", baseString: 4, frets: [-1, -1, 0, 1, 1, 1], fingers: [0, 0, 0, 1, 2, 3] }
   ],
   'dim7': [
-    { name: "Formato Diminuto", baseString: 5, frets: [-1, 0, 1, -1, 1, -1], fingers: [0, 1, 2, 0, 3, 0] } 
+    { name: "Formato Diminuto", baseString: 5, frets: [-1, 0, 1, -1, 1, -1], fingers: [0, 1, 2, 0, 3, 0] }
   ],
   'dim': [
-     { name: "Tríade Diminuta", baseString: 5, frets: [-1, 0, 1, -1, -1, -1], fingers: [0, 1, 2, 0, 0, 0] } 
+    { name: "Tríade Diminuta", baseString: 5, frets: [-1, 0, 1, -1, -1, -1], fingers: [0, 1, 2, 0, 0, 0] }
   ],
   'aug': [
-     { name: "Aumentado", baseString: 6, frets: [0, -1, 2, 1, 1, -1], fingers: [1, 0, 3, 2, 2, 0] } 
+    { name: "Aumentado", baseString: 6, frets: [0, -1, 2, 1, 1, -1], fingers: [1, 0, 3, 2, 2, 0] }
   ]
 };
 
 // Helper para calcular o diagrama de um shape específico
 const calculateChordDiagram = (root: NoteName, shape: ChordShape) => {
   const rootIndex = CHROMATIC_SCALE.indexOf(root);
-  
+
   // Calcula o deslocamento (offset) da pestana/tônica
   let openStringIndex = 4; // E (Corda 6)
   if (shape.baseString === 5) openStringIndex = 9; // A (Corda 5)
@@ -100,10 +100,10 @@ const calculateChordDiagram = (root: NoteName, shape: ChordShape) => {
   // Determina a casa inicial do desenho
   const playedFrets = absoluteFrets.filter(f => f > 0);
   const minPlayed = playedFrets.length > 0 ? Math.min(...playedFrets) : 0;
-  
+
   const hasOpenStrings = absoluteFrets.some(f => f === 0);
   let startFret = minPlayed > 0 ? minPlayed : 1;
-  
+
   if (hasOpenStrings) {
     startFret = 1;
   } else {
@@ -153,24 +153,24 @@ const ChordDiagram: React.FC<{ config: ReturnType<typeof calculateChordDiagram> 
   const SVG_HEIGHT = 180;
 
   return (
-    <div className="relative bg-white rounded-lg p-2 shadow-lg">
+    <div className="relative bg-slate-900 rounded-lg p-2 shadow-lg border border-slate-800">
       <svg width={SVG_WIDTH} height={SVG_HEIGHT} viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}>
         <defs>
           <filter id={`shadow-${config.shapeName}`} x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.3"/>
+            <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.3" />
           </filter>
         </defs>
 
         {/* Casa Inicial Indicador */}
         {config.startFret > 1 && (
-          <text x={MARGIN_X - 8} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-500 text-xs font-bold font-sans">
+          <text x={MARGIN_X - 8} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-400 text-xs font-bold font-sans">
             {config.startFret}ª
           </text>
         )}
 
         {/* NUT */}
         {config.startFret === 1 && (
-          <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={4} fill="#334155" />
+          <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={4} fill="#94a3b8" />
         )}
 
         {/* Frets */}
@@ -181,7 +181,7 @@ const ChordDiagram: React.FC<{ config: ReturnType<typeof calculateChordDiagram> 
             y1={MARGIN_Y + i * FRET_SPACING + (config.startFret === 1 ? 4 : 0)}
             x2={MARGIN_X + STRING_SPACING * 5}
             y2={MARGIN_Y + i * FRET_SPACING + (config.startFret === 1 ? 4 : 0)}
-            stroke="#94a3b8"
+            stroke="#475569"
             strokeWidth={i === 0 && config.startFret > 1 ? 2 : 1}
           />
         ))}
@@ -194,7 +194,7 @@ const ChordDiagram: React.FC<{ config: ReturnType<typeof calculateChordDiagram> 
             y1={MARGIN_Y}
             x2={MARGIN_X + i * STRING_SPACING}
             y2={MARGIN_Y + NUM_FRETS * FRET_SPACING}
-            stroke="#475569"
+            stroke="#64748b"
             strokeWidth={i > 2 ? 1 : 1.5}
           />
         ))}
@@ -202,26 +202,26 @@ const ChordDiagram: React.FC<{ config: ReturnType<typeof calculateChordDiagram> 
         {/* Dots e Indicadores */}
         {config.frets.map((fret, stringIndex) => {
           const x = MARGIN_X + stringIndex * STRING_SPACING;
-          
+
           if (fret === -1) {
             return (
-              <text key={`x-${stringIndex}`} x={x} y={MARGIN_Y - 8} textAnchor="middle" className="fill-slate-400 text-[10px] font-sans font-bold">X</text>
+              <text key={`x-${stringIndex}`} x={x} y={MARGIN_Y - 8} textAnchor="middle" className="fill-slate-500 text-[10px] font-sans font-bold">X</text>
             );
           }
           if (fret === 0) {
             return (
-              <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 12} r={3} fill="none" stroke="#64748b" strokeWidth={1.5} />
+              <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 12} r={3} fill="none" stroke="#94a3b8" strokeWidth={1.5} />
             );
           }
 
           const y = MARGIN_Y + (fret - 0.5) * FRET_SPACING + (config.startFret === 1 ? 4 : 0);
-          
+
           return (
             <g key={`dot-${stringIndex}`}>
-              <circle 
-                cx={x} 
-                cy={y} 
-                r={8} 
+              <circle
+                cx={x}
+                cy={y}
+                r={8}
                 className="fill-brand-600"
                 filter={`url(#shadow-${config.shapeName})`}
               />
@@ -238,9 +238,9 @@ const ChordDiagram: React.FC<{ config: ReturnType<typeof calculateChordDiagram> 
   );
 };
 
-export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = ({ 
-  isOpen, 
-  onClose, 
+export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = ({
+  isOpen,
+  onClose,
   chord,
   degree,
   harmonicFieldRoot,
@@ -256,7 +256,7 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
       setOpenTimestamp(Date.now());
     }
   }, [isOpen, chordType]);
-  
+
   // Buscar shapes do Firebase com fallback para shapes hardcoded
   // Usa timestamp + chordType para garantir reload correto
   const fallbackShapes = SHAPES[chordType] || SHAPES['major'];
@@ -271,8 +271,8 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl relative flex flex-col p-6 max-h-[90vh] overflow-y-auto">
-        
-        <button 
+
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors p-2"
         >
