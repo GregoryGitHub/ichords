@@ -39,7 +39,7 @@ export const ChordsPage: React.FC = () => {
           <span className="text-slate-500 text-sm uppercase tracking-widest mb-2 flex items-center gap-2">
             Resultado <Hand size={14} className="text-brand-500 animate-pulse" />
           </span>
-          <h2 className="text-6xl font-bold text-brand-400 tracking-tight transition-all duration-300 group-hover:text-brand-300 group-hover:drop-shadow-[0_0_15px_rgba(56,189,248,0.3)]">
+          <h2 className="text-6xl font-bold text-brand-400 tracking-tight transition-all duration-300 group-hover:text-brand-300 group-hover:drop-shadow-[0_0_15px_rgba(113,55,200,0.3)]">
             {chordData.symbol}
           </h2>
           <span className="text-slate-400 mt-2 text-sm border-b border-dashed border-slate-700 pb-0.5 group-hover:border-brand-500 transition-colors">
