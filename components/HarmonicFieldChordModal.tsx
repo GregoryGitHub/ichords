@@ -4,6 +4,7 @@ import { CHROMATIC_SCALE } from '../constants';
 import { X } from 'lucide-react';
 import { ScaleLine } from './ScaleLine';
 import { useShapes } from '../hooks/useShapes';
+import { KeyboardChordVisualizer } from './KeyboardChordVisualizer';
 
 interface HarmonicFieldChordModalProps {
   isOpen: boolean;
@@ -247,8 +248,16 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
   mode
 }) => {
   const [openTimestamp, setOpenTimestamp] = useState(0);
+  const [activeTab, setActiveTab] = useState<'guitar' | 'keyboard'>('guitar');
 
   const chordType = getChordTypeFromSymbol(chord.symbol);
+
+  // Reset tab when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab('guitar');
+    }
+  }, [isOpen]);
 
   // Atualizar timestamp quando modal abre OU quando tipo de acorde muda
   useEffect(() => {
@@ -270,7 +279,7 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-4xl relative flex flex-col p-6 max-h-[90vh] overflow-y-auto">
+      <div className={`bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full ${activeTab === 'keyboard' ? 'max-w-lg' : 'max-w-4xl'} relative flex flex-col p-6 max-h-[90vh] overflow-y-auto transition-all duration-300`}>
 
         <button
           onClick={onClose}
@@ -288,29 +297,65 @@ export const HarmonicFieldChordModal: React.FC<HarmonicFieldChordModalProps> = (
           <p className="text-sm text-slate-400">{chord.detailedName}</p>
         </div>
 
+        {/* Tab Selector */}
+        <div className="flex w-full border-b border-slate-800/80 mb-6 text-xs font-semibold max-w-xs mx-auto">
+          <button
+            onClick={() => setActiveTab('guitar')}
+            className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
+              activeTab === 'guitar'
+                ? 'border-brand-500 text-brand-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Violão
+          </button>
+          <button
+            onClick={() => setActiveTab('keyboard')}
+            className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
+              activeTab === 'keyboard'
+                ? 'border-brand-500 text-brand-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Teclado
+          </button>
+        </div>
+
         {/* Scale Line */}
         <div className="mb-6">
           <ScaleLine root={harmonicFieldRoot} mode={mode} chord={chord} />
         </div>
 
-        {/* CAGED Shapes Grid */}
-        <div className="mb-4">
-          <h3 className="text-lg font-bold text-white mb-4 text-center">Formas CAGED</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {chordDiagrams.map((diagram, idx) => (
-              <div key={idx} className="flex flex-col items-center">
-                <ChordDiagram config={diagram} />
-                <p className="text-xs text-slate-400 mt-2 text-center px-2">
-                  {diagram.shapeName}
-                </p>
+        {activeTab === 'guitar' ? (
+          <>
+            {/* ... */}
+            <div className="mb-4">
+              <h3 className="text-lg font-bold text-white mb-4 text-center">Formas CAGED</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {chordDiagrams.map((diagram, idx) => (
+                  <div key={idx} className="flex flex-col items-center">
+                    <ChordDiagram config={diagram} />
+                    <p className="text-xs text-slate-400 mt-2 text-center px-2">
+                      {diagram.shapeName}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        <p className="text-[10px] text-slate-500 text-center leading-tight px-4 mt-4">
-          Os 5 formatos CAGED permitem tocar o mesmo acorde em diferentes posições do braço.
-        </p>
+            <p className="text-[10px] text-slate-500 text-center leading-tight px-4 mt-4">
+              Os 5 formatos CAGED permitem tocar o mesmo acorde em diferentes posições do braço.
+            </p>
+          </>
+        ) : (
+          <div className="max-w-md mx-auto w-full">
+            <KeyboardChordVisualizer 
+              root={chord.root} 
+              notes={chord.notes} 
+              intervals={chord.intervals} 
+            />
+          </div>
+        )}
 
       </div>
     </div>

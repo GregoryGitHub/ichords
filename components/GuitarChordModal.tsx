@@ -3,6 +3,8 @@ import { NoteName } from '../types';
 import { CHROMATIC_SCALE } from '../constants';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useShapes } from '../hooks/useShapes';
+import { KeyboardChordVisualizer } from './KeyboardChordVisualizer';
+import { generateChord } from '../core/musicTheory';
 
 interface GuitarChordModalProps {
   isOpen: boolean;
@@ -183,6 +185,20 @@ const getShapeType = (baseType: string, extensions: number[] = []): string => {
 export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onClose, root, chordType, chordSymbol, extensions }) => {
   const [variationIndex, setVariationIndex] = useState(0);
   const [openTimestamp, setOpenTimestamp] = useState(0);
+  const [activeTab, setActiveTab] = useState<'guitar' | 'keyboard'>('guitar');
+
+  // Reset variation and tab when chord or modal visibility changes
+  useEffect(() => {
+    setVariationIndex(0);
+    if (isOpen) {
+      setActiveTab('guitar');
+    }
+  }, [root, chordType, isOpen]);
+
+  // Generate chord notes and intervals
+  const chordData = useMemo(() => {
+    return generateChord(root, chordType, extensions || []);
+  }, [root, chordType, extensions]);
 
   // Determinar o tipo de shape baseado nas extensões
   const shapeType = getShapeType(chordType, extensions);
@@ -198,11 +214,6 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
   // Usa timestamp + shapeType para garantir reload correto
   const fallbackShapes = SHAPES[shapeType] || SHAPES[chordType] || SHAPES['major'];
   const shapes = useShapes(shapeType, fallbackShapes, openTimestamp);
-
-  // Reset variation when chord changes
-  useEffect(() => {
-    setVariationIndex(0);
-  }, [root, chordType, isOpen]);
 
   // Lógica para calcular as casas (frets)
   const chordConfig = useMemo(() => {
@@ -287,7 +298,7 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-[340px] relative flex flex-col items-center p-5 max-h-[85vh] overflow-y-auto no-scrollbar">
+      <div className={`bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full ${activeTab === 'keyboard' ? 'max-w-[370px]' : 'max-w-[340px]'} relative flex flex-col items-center p-5 max-h-[85vh] overflow-y-auto no-scrollbar transition-all duration-300`}>
         
         <button 
           onClick={onClose}
@@ -296,132 +307,166 @@ export const GuitarChordModal: React.FC<GuitarChordModalProps> = ({ isOpen, onCl
           <X size={24} />
         </button>
 
-        <div className="text-center mt-2 mb-4 w-full">
+        <div className="text-center mt-2 mb-3 w-full">
            <h2 className="text-3xl font-bold text-brand-400">{chordSymbol}</h2>
         </div>
 
-        {/* Navigation Controls */}
-        <div className="flex items-center justify-between w-full px-2 mb-2 bg-slate-800/50 p-2 rounded-lg">
-          <button 
-            onClick={prevVariation}
-            className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
-            disabled={chordConfig.totalVariations <= 1}
+        {/* Tab Selector */}
+        <div className="flex w-full border-b border-slate-800/80 mb-4 text-xs font-semibold">
+          <button
+            onClick={() => setActiveTab('guitar')}
+            className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
+              activeTab === 'guitar'
+                ? 'border-brand-500 text-brand-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
           >
-            <ChevronLeft size={20} />
+            Violão
           </button>
-          
-          <div className="flex flex-col items-center">
-             <span className="text-slate-200 text-xs font-semibold text-center">
-               {chordConfig.shapeName}
-             </span>
-             <span className="text-slate-500 text-[10px] uppercase mt-0.5">
-               {chordConfig.currentIndex + 1} / {chordConfig.totalVariations}
-             </span>
-          </div>
-
-          <button 
-            onClick={nextVariation}
-            className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
-            disabled={chordConfig.totalVariations <= 1}
+          <button
+            onClick={() => setActiveTab('keyboard')}
+            className={`flex-1 pb-2 border-b-2 text-center transition-colors ${
+              activeTab === 'keyboard'
+                ? 'border-brand-500 text-brand-400 font-bold'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
           >
-            <ChevronRight size={20} />
+            Teclado
           </button>
         </div>
 
-        {/* Diagrama SVG */}
-        <div className="relative bg-slate-900 rounded-lg p-2 shadow-lg mb-2 border border-slate-800">
-           <svg width={SVG_WIDTH} height={SVG_HEIGHT} viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}>
-              {/* Defs para sombras */}
-              <defs>
-                <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000000" floodOpacity="0.3"/>
-                </filter>
-              </defs>
+        {activeTab === 'guitar' ? (
+          <>
+            {/* Navigation Controls */}
+            <div className="flex items-center justify-between w-full px-2 mb-2 bg-slate-800/50 p-2 rounded-lg">
+              <button 
+                onClick={prevVariation}
+                className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
+                disabled={chordConfig.totalVariations <= 1}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              
+              <div className="flex flex-col items-center">
+                 <span className="text-slate-200 text-xs font-semibold text-center">
+                   {chordConfig.shapeName}
+                 </span>
+                 <span className="text-slate-500 text-[10px] uppercase mt-0.5">
+                   {chordConfig.currentIndex + 1} / {chordConfig.totalVariations}
+                 </span>
+              </div>
 
-              {/* Casa Inicial Indicador (ex: 5ª casa) */}
-              {chordConfig.startFret > 1 && (
-                <text x={MARGIN_X - 12} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-400 text-sm font-bold font-sans">
-                  {chordConfig.startFret}ª
-                </text>
-              )}
+              <button 
+                onClick={nextVariation}
+                className="p-2 rounded-full bg-slate-800 text-brand-500 hover:bg-slate-700 disabled:opacity-50"
+                disabled={chordConfig.totalVariations <= 1}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
 
-              {/* NUT (Pestana superior) */}
-              {chordConfig.startFret === 1 && (
-                <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={5} fill="#94a3b8" />
-              )}
+            {/* Diagrama SVG */}
+            <div className="relative bg-slate-900 rounded-lg p-2 shadow-lg mb-2 border border-slate-800">
+               <svg width={SVG_WIDTH} height={SVG_HEIGHT} viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}>
+                  {/* Defs para sombras */}
+                  <defs>
+                    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000000" floodOpacity="0.3"/>
+                    </filter>
+                  </defs>
 
-              {/* Frets (Linhas Horizontais) */}
-              {Array.from({ length: NUM_FRETS + 1 }).map((_, i) => (
-                <line
-                  key={`fret-${i}`}
-                  x1={MARGIN_X}
-                  y1={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
-                  x2={MARGIN_X + STRING_SPACING * 5}
-                  y2={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
-                  stroke="#475569"
-                  strokeWidth={i === 0 && chordConfig.startFret > 1 ? 2 : 1} // Top line slightly thicker if not nut
-                />
-              ))}
+                  {/* Casa Inicial Indicador (ex: 5ª casa) */}
+                  {chordConfig.startFret > 1 && (
+                    <text x={MARGIN_X - 12} y={MARGIN_Y + FRET_SPACING / 1.5} textAnchor="end" className="fill-slate-400 text-sm font-bold font-sans">
+                      {chordConfig.startFret}ª
+                    </text>
+                  )}
 
-              {/* Strings (Linhas Verticais) */}
-              {Array.from({ length: NUM_STRINGS }).map((_, i) => (
-                <line
-                  key={`string-${i}`}
-                  x1={MARGIN_X + i * STRING_SPACING}
-                  y1={MARGIN_Y}
-                  x2={MARGIN_X + i * STRING_SPACING}
-                  y2={MARGIN_Y + NUM_FRETS * FRET_SPACING}
-                  stroke="#64748b"
-                  strokeWidth={i > 2 ? 1 : 1.5} // Cordas graves mais grossas
-                />
-              ))}
+                  {/* NUT (Pestana superior) */}
+                  {chordConfig.startFret === 1 && (
+                    <rect x={MARGIN_X} y={MARGIN_Y} width={STRING_SPACING * 5} height={5} fill="#94a3b8" />
+                  )}
 
-              {/* Dots e Indicadores Superiores (X / O) */}
-              {chordConfig.frets.map((fret, stringIndex) => {
-                // stringIndex 0 = Low E (esquerda no diagrama)
-                const x = MARGIN_X + stringIndex * STRING_SPACING;
-                
-                // Indicadores X ou O acima do nut
-                if (fret === -1) {
-                  return (
-                    <text key={`x-${stringIndex}`} x={x} y={MARGIN_Y - 10} textAnchor="middle" className="fill-slate-500 text-xs font-sans font-bold">X</text>
-                  );
-                }
-                if (fret === 0) {
-                  // Corda solta mas tocada
-                  return (
-                    <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 14} r={4} fill="none" stroke="#94a3b8" strokeWidth={2} />
-                  );
-                }
-
-                // Bolinha no braço
-                const y = MARGIN_Y + (fret - 0.5) * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0);
-                
-                return (
-                  <g key={`dot-${stringIndex}`}>
-                    <circle 
-                      cx={x} 
-                      cy={y} 
-                      r={10} 
-                      className="fill-brand-600"
-                      filter="url(#shadow)"
+                  {/* Frets (Linhas Horizontais) */}
+                  {Array.from({ length: NUM_FRETS + 1 }).map((_, i) => (
+                    <line
+                      key={`fret-${i}`}
+                      x1={MARGIN_X}
+                      y1={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
+                      x2={MARGIN_X + STRING_SPACING * 5}
+                      y2={MARGIN_Y + i * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0)}
+                      stroke="#475569"
+                      strokeWidth={i === 0 && chordConfig.startFret > 1 ? 2 : 1} // Top line slightly thicker if not nut
                     />
-                    {/* Dedo sugerido (se houver) */}
-                    {chordConfig.fingers && chordConfig.fingers[stringIndex] > 0 && (
-                       <text x={x} y={y + 4} textAnchor="middle" className="fill-white text-xs font-bold font-sans">
-                         {chordConfig.fingers[stringIndex]}
-                       </text>
-                    )}
-                  </g>
-                );
-              })}
+                  ))}
 
-           </svg>
-        </div>
+                  {/* Strings (Linhas Verticais) */}
+                  {Array.from({ length: NUM_STRINGS }).map((_, i) => (
+                    <line
+                      key={`string-${i}`}
+                      x1={MARGIN_X + i * STRING_SPACING}
+                      y1={MARGIN_Y}
+                      x2={MARGIN_X + i * STRING_SPACING}
+                      y2={MARGIN_Y + NUM_FRETS * FRET_SPACING}
+                      stroke="#64748b"
+                      strokeWidth={i > 2 ? 1 : 1.5} // Cordas graves mais grossas
+                    />
+                  ))}
 
-        <p className="text-[10px] text-slate-500 text-center leading-tight px-4">
-          O diagrama mostra onde posicionar os dedos no braço do instrumento.
-        </p>
+                  {/* Dots e Indicadores Superiores (X / O) */}
+                  {chordConfig.frets.map((fret, stringIndex) => {
+                    // stringIndex 0 = Low E (esquerda no diagrama)
+                    const x = MARGIN_X + stringIndex * STRING_SPACING;
+                    
+                    // Indicadores X ou O acima do nut
+                    if (fret === -1) {
+                      return (
+                        <text key={`x-${stringIndex}`} x={x} y={MARGIN_Y - 10} textAnchor="middle" className="fill-slate-500 text-xs font-sans font-bold">X</text>
+                      );
+                    }
+                    if (fret === 0) {
+                      // Corda solta mas tocada
+                      return (
+                        <circle key={`o-${stringIndex}`} cx={x} cy={MARGIN_Y - 14} r={4} fill="none" stroke="#94a3b8" strokeWidth={2} />
+                      );
+                    }
+
+                    // Bolinha no braço
+                    const y = MARGIN_Y + (fret - 0.5) * FRET_SPACING + (chordConfig.startFret === 1 ? 5 : 0);
+                    
+                    return (
+                      <g key={`dot-${stringIndex}`}>
+                        <circle 
+                          cx={x} 
+                          cy={y} 
+                          r={10} 
+                          className="fill-brand-600"
+                          filter="url(#shadow)"
+                        />
+                        {/* Dedo sugerido (se houver) */}
+                        {chordConfig.fingers && chordConfig.fingers[stringIndex] > 0 && (
+                           <text x={x} y={y + 4} textAnchor="middle" className="fill-white text-xs font-bold font-sans">
+                             {chordConfig.fingers[stringIndex]}
+                           </text>
+                        )}
+                      </g>
+                    );
+                  })}
+
+               </svg>
+            </div>
+
+            <p className="text-[10px] text-slate-500 text-center leading-tight px-4 mt-2">
+              O diagrama mostra onde posicionar os dedos no braço do instrumento.
+            </p>
+          </>
+        ) : (
+          <KeyboardChordVisualizer 
+            root={root} 
+            notes={chordData.notes} 
+            intervals={chordData.intervals} 
+          />
+        )}
 
       </div>
     </div>
