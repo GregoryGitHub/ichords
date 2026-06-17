@@ -70,36 +70,127 @@ export const KeyboardChordVisualizer: React.FC<KeyboardChordVisualizerProps> = (
   // Standard gray color for all pressed keys
   const ACTIVE_KEY_FILL = '#cbd5e1';
 
-  const assignSingleHandKeys = (
-    target: Map<number, ActiveKey>,
-    rootOffset: number,
-    hand: 'left' | 'right',
-    transposeOctave: number,
-  ) => {
-    const keysList: Omit<ActiveKey, 'finger'>[] = intervals.map((interval, idx) => {
-      let keyIndex = rootOffset + transposeOctave + interval.semitones;
-      while (keyIndex > 36) {
-        if (transposeOctave > 0 && keyIndex - 12 < rootOffset + transposeOctave) {
-          break;
-        }
-        keyIndex -= 12;
-      }
-      return {
-        keyIndex,
-        noteName: notes[idx] || '',
-        interval,
-        hand,
-      };
-    });
+  // Máximo confortável para uma mão (~10ª)
+  const MAX_HAND_SPAN = 14;
 
+  const getVoicedSemitoneOffset = (semitone: number) => {
+    let voiced = semitone;
+    while (voiced > 11) {
+      voiced -= 12;
+    }
+    return voiced;
+  };
+
+  const getCompactKeyIndices = (baseKeyIndex: number, intervalList: Interval[]) => {
+    const entries = intervalList.map((interval, idx) => ({
+      idx,
+      interval,
+      voicedOffset: getVoicedSemitoneOffset(interval.semitones),
+    }));
+
+    entries.sort((a, b) => a.voicedOffset - b.voicedOffset || a.interval.semitones - b.interval.semitones);
+
+    const keyByIdx = new Map<number, number>();
+    const placedKeys: number[] = [];
+
+    for (const entry of entries) {
+      const target = baseKeyIndex + entry.voicedOffset;
+      const candidates = [target, target - 12, target + 12].filter(
+        (key) => key >= 0 && key <= 36,
+      );
+
+      let bestKey = target;
+      let bestSpan = Infinity;
+      let bestDistance = Infinity;
+
+      for (const candidate of candidates) {
+        const trial = [...placedKeys, candidate].sort((a, b) => a - b);
+        const span = trial[trial.length - 1] - trial[0];
+        const distanceFromTarget = Math.abs(candidate - target);
+
+        if (span > MAX_HAND_SPAN) continue;
+
+        if (
+          span < bestSpan ||
+          (span === bestSpan && distanceFromTarget < bestDistance)
+        ) {
+          bestSpan = span;
+          bestDistance = distanceFromTarget;
+          bestKey = candidate;
+        }
+      }
+
+      if (
+        entry.interval.semitones >= 21 &&
+        bestSpan !== Infinity &&
+        bestKey - 12 >= 0
+      ) {
+        const lowerKey = bestKey - 12;
+        const trial = [...placedKeys, lowerKey].sort((a, b) => a - b);
+        const lowerSpan = trial[trial.length - 1] - trial[0];
+
+        if (lowerSpan <= MAX_HAND_SPAN && lowerSpan <= bestSpan + 1) {
+          bestKey = lowerKey;
+          bestSpan = lowerSpan;
+        }
+      }
+
+      if (bestSpan === Infinity) {
+        bestKey = target;
+        while (bestKey > 36) bestKey -= 12;
+        while (bestKey < 0) bestKey += 12;
+        while (placedKeys.length > 0 && bestKey <= placedKeys[placedKeys.length - 1]) {
+          bestKey += 12;
+        }
+      }
+
+      keyByIdx.set(entry.idx, bestKey);
+      placedKeys.push(bestKey);
+      placedKeys.sort((a, b) => a - b);
+    }
+
+    return keyByIdx;
+  };
+
+  const getFingerPattern = (noteCount: number, hand: 'left' | 'right', span: number) => {
+    const mirrorForLeft = (pattern: number[]) => pattern.map((finger) => 6 - finger);
+
+    let rightHandPattern: number[];
+
+    if (noteCount === 1) {
+      rightHandPattern = [1];
+    } else if (noteCount === 2) {
+      if (span <= 2) rightHandPattern = [1, 2];
+      else if (span <= 4) rightHandPattern = [1, 3];
+      else if (span <= 6) rightHandPattern = [1, 4];
+      else rightHandPattern = [1, 5];
+    } else if (noteCount === 3) {
+      if (span <= 4) rightHandPattern = [1, 2, 3];
+      else if (span <= 7) rightHandPattern = [1, 2, 4];
+      else rightHandPattern = [1, 3, 5];
+    } else if (noteCount === 4) {
+      if (span <= 5) rightHandPattern = [1, 2, 3, 4];
+      else if (span <= 9) rightHandPattern = [1, 2, 3, 5];
+      else rightHandPattern = [1, 2, 4, 5];
+    } else if (noteCount === 5) {
+      rightHandPattern = [1, 2, 3, 4, 5];
+    } else {
+      rightHandPattern = Array.from({ length: noteCount }, (_, i) => (i < 5 ? i + 1 : 5));
+    }
+
+    return hand === 'left' ? mirrorForLeft(rightHandPattern) : rightHandPattern;
+  };
+
+  const assignFingersToKeys = (target: Map<number, ActiveKey>, keysList: ActiveKey[]) => {
+    if (keysList.length === 0) return;
+
+    const hand = keysList[0].hand;
     const sortedKeys = [...keysList].sort((a, b) => a.keyIndex - b.keyIndex);
-    const N = sortedKeys.length;
-    let fingers: number[] = [];
-    if (N === 1) fingers = [1];
-    else if (N === 2) fingers = [1, 5];
-    else if (N === 3) fingers = [1, 3, 5];
-    else if (N === 4) fingers = [1, 2, 4, 5];
-    else fingers = Array.from({ length: N }, (_, i) => (i < 5 ? i + 1 : 5));
+    const span =
+      sortedKeys.length > 1
+        ? sortedKeys[sortedKeys.length - 1].keyIndex - sortedKeys[0].keyIndex
+        : 0;
+    const fingers = getFingerPattern(sortedKeys.length, hand, span);
 
     sortedKeys.forEach((key, idx) => {
       target.set(key.keyIndex, {
@@ -109,38 +200,106 @@ export const KeyboardChordVisualizer: React.FC<KeyboardChordVisualizerProps> = (
     });
   };
 
-  const assignLeftHandBassKeys = (target: Map<number, ActiveKey>, rootOffset: number) => {
-    const lhKeysList: Omit<ActiveKey, 'finger'>[] = [];
+  const assignSingleHandKeys = (
+    target: Map<number, ActiveKey>,
+    rootOffset: number,
+    hand: 'left' | 'right',
+    transposeOctave: number,
+  ) => {
+    const baseKeyIndex = rootOffset + transposeOctave;
+    const keyByIdx = getCompactKeyIndices(baseKeyIndex, intervals);
 
-    lhKeysList.push({
-      keyIndex: rootOffset,
-      noteName: root,
-      interval: intervals.find(i => i.quality === 'root') || { semitones: 0, name: 'Tônica', shortName: 'T', quality: 'root' },
-      hand: 'left' as const,
-    });
+    const keysList: ActiveKey[] = intervals.map((interval, idx) => ({
+      keyIndex: keyByIdx.get(idx) ?? baseKeyIndex + getVoicedSemitoneOffset(interval.semitones),
+      noteName: notes[idx] || '',
+      interval,
+      hand,
+    }));
 
-    const fifthInterval = intervals.find(i => i.quality === 'fifth');
-    if (fifthInterval) {
-      const fifthIdx = intervals.indexOf(fifthInterval);
-      lhKeysList.push({
-        keyIndex: rootOffset + fifthInterval.semitones,
-        noteName: notes[fifthIdx] || '',
-        interval: fifthInterval,
-        hand: 'left' as const,
-      });
-    }
+    assignFingersToKeys(target, keysList);
+  };
 
-    const sortedLhKeys = [...lhKeysList].sort((a, b) => a.keyIndex - b.keyIndex);
-    sortedLhKeys.forEach((key, idx) => {
-      let finger = 5;
-      if (sortedLhKeys.length > 1 && idx === 1) {
-        finger = 1;
+  const assignTwoHandsKeys = (target: Map<number, ActiveKey>, rootOffset: number) => {
+    type ChordEntry = {
+      idx: number;
+      interval: Interval;
+      noteName: string;
+      voicedOffset: number;
+    };
+
+    const entries: ChordEntry[] = intervals
+      .map((interval, idx) => ({
+        idx,
+        interval,
+        noteName: notes[idx] || '',
+        voicedOffset: getVoicedSemitoneOffset(interval.semitones),
+      }))
+      .sort(
+        (a, b) =>
+          a.voicedOffset - b.voicedOffset || a.interval.semitones - b.interval.semitones,
+      );
+
+    const noteCount = entries.length;
+
+    const getHandEntryPriority = (entry: ChordEntry, hand: 'left' | 'right') => {
+      if (entry.interval.quality === 'root') return 0;
+      if (entry.interval.quality === 'fifth') return hand === 'left' ? 1 : 2;
+      if (entry.interval.quality === 'third') return hand === 'left' ? 2 : 1;
+      if (entry.interval.semitones === 14 || entry.interval.shortName === '9') {
+        return hand === 'left' ? 4 : 3;
       }
-      target.set(key.keyIndex, {
-        ...key,
-        finger,
-      });
-    });
+      if (entry.interval.semitones === 21 || entry.interval.shortName === '13') return 4;
+      if (entry.interval.semitones === 17 || entry.interval.shortName === '11') {
+        return hand === 'left' ? 3 : 6;
+      }
+      if (entry.interval.quality === 'seventh') return 5;
+      return 7;
+    };
+
+    const selectEntriesForHand = (hand: 'left' | 'right', maxNotes: number, excludeIdx: Set<number>) => {
+      return [...entries]
+        .filter((entry) => !excludeIdx.has(entry.idx))
+        .sort(
+          (a, b) =>
+            getHandEntryPriority(a, hand) - getHandEntryPriority(b, hand) ||
+            a.voicedOffset - b.voicedOffset,
+        )
+        .slice(0, maxNotes)
+        .sort(
+          (a, b) =>
+            a.voicedOffset - b.voicedOffset || a.interval.semitones - b.interval.semitones,
+        );
+    };
+
+    const assignHandGroup = (
+      groupEntries: ChordEntry[],
+      hand: 'left' | 'right',
+      baseKeyIndex: number,
+    ) => {
+      if (groupEntries.length === 0) return;
+
+      const groupIntervals = groupEntries.map((entry) => entry.interval);
+      const keyByLocalIdx = getCompactKeyIndices(baseKeyIndex, groupIntervals);
+
+      const keysList: ActiveKey[] = groupEntries.map((entry, localIdx) => ({
+        keyIndex:
+          keyByLocalIdx.get(localIdx) ??
+          baseKeyIndex + getVoicedSemitoneOffset(entry.interval.semitones),
+        noteName: entry.noteName,
+        interval: entry.interval,
+        hand,
+      }));
+
+      assignFingersToKeys(target, keysList);
+    };
+
+    const maxLhNotes = noteCount <= 3 ? 2 : noteCount <= 5 ? 3 : 4;
+
+    const lhEntries = selectEntriesForHand('left', maxLhNotes, new Set());
+    const rhEntries = selectEntriesForHand('right', 5, new Set());
+
+    assignHandGroup(lhEntries, 'left', rootOffset);
+    assignHandGroup(rhEntries, 'right', rootOffset + 12);
   };
 
   const getActiveKeyColor = (activeInfo: ActiveKey, labelMode: 'intervals' | 'fingers') => {
@@ -165,8 +324,7 @@ export const KeyboardChordVisualizer: React.FC<KeyboardChordVisualizerProps> = (
     } else if (handMode === 'left') {
       assignSingleHandKeys(result, rootOffset, 'left', 0);
     } else {
-      assignLeftHandBassKeys(result, rootOffset);
-      assignSingleHandKeys(result, rootOffset, 'right', 12);
+      assignTwoHandsKeys(result, rootOffset);
     }
 
     return result;
@@ -424,14 +582,14 @@ export const KeyboardChordVisualizer: React.FC<KeyboardChordVisualizerProps> = (
             <span className="font-semibold text-slate-300">Dedilhado de Duas Mãos</span>
             <span className="text-[9px] text-slate-500">1=Polegar | 5=Mínimo</span>
           </div>
-          <div className="flex gap-4 justify-around">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-4 sm:justify-around">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getHandColor('left') }} />
-              Mão Esquerda: Baixo (Tônica + Quinta)
+              Mão Esquerda: baixo cheio (tônica, quinta, terça…)
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getHandColor('right') }} />
-              Mão Direita: Acorde & Extensões
+              Mão Direita: acorde completo (1 oitava acima)
             </span>
           </div>
         </>
