@@ -48,7 +48,7 @@ export const KeyboardChordVisualizer: React.FC<KeyboardChordVisualizerProps> = (
   const W_B = 8;  // Black key width
   const H_B = 38; // Black key height
   const SVG_WIDTH = 22 * W_W; // 22 white keys (3 octaves + 1 extra C)
-  const SVG_HEIGHT = 80;
+  const SVG_HEIGHT = 88;
 
   // Interval Quality Color Map
   const getIntervalColor = (quality?: string) => {
@@ -711,7 +711,7 @@ export const KeyboardChordVisualizer: React.FC<KeyboardChordVisualizerProps> = (
 
       {isZoomed && (
         <div
-          className="fixed inset-0 z-[200] flex flex-col justify-center bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200"
+          className="fixed inset-0 z-[200] flex flex-col bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setIsZoomed(false)}
           role="dialog"
           aria-modal="true"
@@ -720,25 +720,25 @@ export const KeyboardChordVisualizer: React.FC<KeyboardChordVisualizerProps> = (
           <button
             type="button"
             onClick={() => setIsZoomed(false)}
-            className="absolute top-4 right-4 z-10 rounded-full bg-slate-800/90 p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
+            className="absolute top-[max(0.75rem,env(safe-area-inset-top))] right-[max(0.75rem,env(safe-area-inset-right))] z-10 rounded-full bg-slate-800/90 p-2 text-slate-400 transition-colors hover:bg-slate-700 hover:text-white"
             aria-label="Fechar ampliação"
           >
             <X size={22} />
           </button>
 
           <div
-            className="w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200"
+            className="flex-1 min-h-0 w-full overflow-auto overscroll-contain px-2 pt-14 pb-4 animate-in zoom-in-95 duration-200"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="w-full bg-slate-950 border-y border-slate-800 shadow-2xl">
-              <div className="py-4 px-1">
-                {renderKeyboardSvg('w-full h-auto overflow-visible', true)}
+            <div className="w-full min-w-0 bg-slate-950 border border-slate-800 rounded-xl shadow-2xl mx-auto">
+              <div className="p-3 sm:p-4">
+                {renderKeyboardSvg('w-full h-auto block', true)}
               </div>
               {renderHandsSection(true)}
             </div>
           </div>
 
-          <p className="absolute bottom-6 left-0 right-0 text-center text-[11px] text-slate-500">
+          <p className="shrink-0 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] text-center text-[11px] text-slate-500">
             Toque fora ou pressione Esc para fechar
           </p>
         </div>
